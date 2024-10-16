@@ -1,0 +1,42 @@
+name: Docker Build and Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build React Docker Image
+        run: |
+          docker build . -t frontend:latest
+          echo "Docker image built successfully"
+          echo "Local Docker images:"
+          docker images
+
+      - name: Run React Docker Contianer
+        run: docker run --name frontend_test_container -d frontend:latest
+
+      - name: Check if container is ran successfully
+        run: |
+          # Sleep for a few seconds to allow the container to start
+          # and then check if the container is still running
+          sleep 10
+          docker ps | grep frontend_test_container
+
+      - name: Output docker logs on failure (for debugging)
+        if: failure()
+        run: docker logs frontend_test_container
+
+      - name: Stop Docker container
+        run: docker stop frontend_test_container
+
+      - name: Remove Docker container
+        run: docker rm frontend_test_container
