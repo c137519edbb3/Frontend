@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // Define the context value type
 interface AuthContextType {
@@ -20,6 +20,7 @@ interface AuthProviderProps {
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -27,7 +28,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setIsAuthenticated(true);
     } else {
       setIsAuthenticated(false);
-      if (router.pathname !== "/auth/login") {
+      if (pathname !== "/auth/login") {
         router.push("/auth/login");
       }
     }
