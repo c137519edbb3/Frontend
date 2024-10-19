@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { Config } from "tailwindcss";
-import defaultTheme from "tailwindcss/defaultTheme";
 
-import colors from "tailwindcss/colors";
-import { default as flattenColorPalette } from "tailwindcss/lib/util/flattenColorPalette";
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const flattenColorPalette = require("tailwindcss/lib/util/flattenColorPalette");
 import svgToDataUri from "mini-svg-data-uri";
 
 const config: Config = {
@@ -66,6 +66,7 @@ const config: Config = {
       },
     },
   },
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
   plugins: [require("tailwindcss-animate"), addVariablesForColors, addGrid],
 };
 
