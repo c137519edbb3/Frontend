@@ -42,6 +42,7 @@ export function LoginForm() {
       }
     } catch (error) {
       setError("Invalid credentials");
+      console.log(error);
     }
   };
 
