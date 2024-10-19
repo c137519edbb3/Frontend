@@ -1,12 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/context/authContext";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export function LoginForm() {
+  const {isAuthenticated, login} = useAuth();
+  const router = useRouter();
   const [credentials, setCredentials] = useState({ username: "", password: "" });
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/admin");
+    }
+  }, [isAuthenticated, router]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -25,13 +35,13 @@ export function LoginForm() {
         // Save the access token to localStorage or sessionStorage
         localStorage.setItem("access_token", data.access_token);
         setError(null);
-        alert("Login successful!");
+        login(data.access_token)
       } else {
         const errorData = await response.json();
         setError(errorData.detail || "Login failed. Please check your credentials.");
       }
     } catch (error) {
-      setError(`An error occurred during login. Please try again: ${error}`);
+      setError("Invalid credentials");
     }
   };
 
