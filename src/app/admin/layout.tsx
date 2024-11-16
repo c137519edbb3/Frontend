@@ -11,6 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
+import { superAdminNavbar } from "@/constants/config";
 
 
 export default function AdminLayout({
@@ -20,9 +21,9 @@ export default function AdminLayout({
 }>) {
   return (
     <ProtectedRoute>
-       <SidebarHeader />
+      <SidebarHeader/>
       <SidebarProvider>
-        <AppSidebar />
+        <AppSidebar items={superAdminNavbar} />
         <main>
           <SidebarTrigger />
           {children}

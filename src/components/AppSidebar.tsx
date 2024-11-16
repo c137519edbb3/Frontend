@@ -1,6 +1,5 @@
 "use client";
-import { Home, Inbox, Settings } from "lucide-react";
-import Link from "next/link"; // Import Link from next/link
+import Link from "next/link";
 import {
   Sidebar,
   SidebarContent,
@@ -14,27 +13,40 @@ import {
 } from "@/components/ui/sidebar";
 import { SidebarButton } from "./ui/sidebar_button";
 import { useAuth } from "@/context/authContext";
+import { 
+  BarChart, 
+  Aperture, 
+  Ratio, 
+  Bell, 
+  Users, 
+  Calendar, 
+  CreditCard, 
+  Group, 
+  Home, 
+  Inbox, 
+  Search, 
+  Settings, 
+  AlertTriangle
+} from "lucide-react";
 
-// Menu items.
-const items = [
-  {
-    title: "Dashboard",
-    url: "/admin", // Update URLs to actual routes
-    icon: Home,
-  },
-  {
-    title: "Anomalies",
-    url: "/admin/anomalies", // Update URLs to actual routes
-    icon: Inbox,
-  },
-  {
-    title: "Settings",
-    url: "/admin/settings", // Update URLs to actual routes
-    icon: Settings
-  }
-];
+const iconMap = {
+  home: Home,
+  inbox: Inbox,
+  calendar: Calendar,
+  search: Search,
+  settings: Settings,
+  dashboard: Home,  
+  group: Group,          
+  bar_chart: BarChart,    
+  credit_card: CreditCard,
+  error: AlertTriangle,
+  people: Users,    
+  devices: Aperture,
+  assessment: Ratio,
+  notifications: Bell,
+};
 
-export function AppSidebar() {
+export function AppSidebar({ items }: AppSidebarProps) {
   const { logout } = useAuth();
   return (
     <Sidebar>
@@ -43,26 +55,22 @@ export function AppSidebar() {
           <SidebarGroupLabel>Application</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="flex flex-col justify-between h-full">
-              {" "}
-              {/* Make the SidebarMenu a flex container */}
               <div>
-                {" "}
-                {/* Wrap the menu items in a div */}
-                {items.map((item) => (
-                  <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild>
-                      <Link href={item.url} passHref>
-                        <div className="flex items-center">
-                          {" "}
-                          {/* Optional: Add a flex container for alignment */}
-                          {/* Decreased size of icons */}
-                          <item.icon className="h-4 w-4 mr-2 text-neutral-700 dark:text-neutral-200" />
-                          <span>{item.title}</span>
-                        </div>
-                      </Link>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                {items.map((item) => {
+                  const IconComponent = iconMap[item.icon as keyof typeof iconMap];
+                  return (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <Link href={item.url} passHref>
+                          <div className="flex items-center">
+                            {IconComponent && <IconComponent className="h-4 w-4 mr-2 text-neutral-700 dark:text-neutral-200" />}
+                            <span>{item.title}</span>
+                          </div>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                })}
               </div>
             </SidebarMenu>
           </SidebarGroupContent>
