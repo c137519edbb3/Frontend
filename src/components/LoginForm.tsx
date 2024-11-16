@@ -20,30 +20,30 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    login('adfadsfs');
+    // try {
+    //   const response = await fetch("http://localhost:8000/api/v1/login", {
+    //     method: "POST",
+    //     headers: {
+    //       "Content-Type": "application/json",
+    //     },
+    //     body: JSON.stringify(credentials),
+    //   });
 
-    try {
-      const response = await fetch("http://localhost:8000/api/v1/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(credentials),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        // Save the access token to localStorage or sessionStorage
-        localStorage.setItem("access_token", data.access_token);
-        setError(null);
-        login(data.access_token)
-      } else {
-        const errorData = await response.json();
-        setError(errorData.detail || "Login failed. Please check your credentials.");
-      }
-    } catch (error) {
-      setError("Invalid credentials");
-      console.log(error);
-    }
+    //   if (response.ok) {
+    //     const data = await response.json();
+    //     // Save the access token to localStorage or sessionStorage
+    //     localStorage.setItem("access_token", data.access_token);
+    //     setError(null);
+    //     login(data.access_token)
+    //   } else {
+    //     const errorData = await response.json();
+    //     setError(errorData.detail || "Login failed. Please check your credentials.");
+    //   }
+    // } catch (error) {
+    //   setError("Invalid credentials");
+    //   console.log(error);
+    // }
   };
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
