@@ -1,20 +1,33 @@
-# Use the official Node.js image as a base
-FROM node:20
+# Base image for building
+FROM node:18-alpine AS builder
 
-# Set the working directory inside the container
+# Set working directory
 WORKDIR /app
 
-# Copy package.json and package-lock.json to the working directory
+# Copy package.json and install dependencies
 COPY package*.json ./
+RUN npm install --frozen-lockfile
 
-# Install dependencies
-RUN npm install
-
-# Copy the rest of the application source code to the working directory
+# Copy the application code
 COPY . .
 
-# Expose the port that the app runs on
+# Build the application
+RUN npm run build
+
+# Production image
+FROM node:18-alpine
+WORKDIR /app
+
+# Copy only the built application and necessary files
+COPY --from=builder /app/.next /app/.next
+COPY --from=builder /app/package*.json /app/
+COPY --from=builder /app/public /app/public
+
+# Install only production dependencies
+RUN npm install --frozen-lockfile --production
+
+# Expose the production port
 EXPOSE 3000
 
-# Start the React development server
-CMD ["npm", "run", "dev"]
+# Run the application
+CMD ["npm", "start"]
