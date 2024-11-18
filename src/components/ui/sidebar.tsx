@@ -85,23 +85,31 @@ export const DesktopSidebar = ({
   ...props
 }: React.ComponentProps<typeof motion.div>) => {
   const { open, setOpen, animate } = useSidebar();
+  
   return (
-    <>
-      <motion.div
-        className={cn(
-          "h-full px-4 py-4 hidden  md:flex md:flex-col bg-neutral-100 dark:bg-neutral-800 w-[300px] flex-shrink-0",
-          className
-        )}
-        animate={{
-          width: animate ? (open ? "300px" : "60px") : "300px",
-        }}
-        onMouseEnter={() => setOpen(true)}
-        onMouseLeave={() => setOpen(false)}
-        {...props}
-      >
-        {children}
-      </motion.div>
-    </>
+    <motion.div
+      className={cn(
+        "h-full hidden md:flex md:flex-col",
+        "bg-neutral-100 dark:bg-neutral-800",
+        "will-change-[width]", // Optimize for width animations
+        "px-4 py-4",
+        className
+      )}
+      initial={false} // Disable initial animation
+      animate={{
+        width: animate ? (open ? "300px" : "60px") : "300px",
+      }}
+      transition={{
+        duration: 0.2, // Shorter duration
+        ease: "easeOut", // Smoother easing
+        type: "tween" // Use simpler animation type
+      }}
+      onHoverStart={() => setOpen(true)}
+      onHoverEnd={() => setOpen(false)}
+      {...props}
+    >
+      {children}
+    </motion.div>
   );
 };
 

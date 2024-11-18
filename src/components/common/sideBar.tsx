@@ -1,11 +1,13 @@
 import Image from "next/image";
-import ProtectedRoute from "@/components/ProtectedRoute";
+import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Sidebar, SidebarBody,  SidebarLink, SidebarProvider} from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from "@tabler/icons-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { useState } from "react";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { IconBell } from "@tabler/icons-react"; // Import the notification icon
 
 interface Link {
 label: string;
@@ -26,12 +28,12 @@ export function SideBarWidget({
     return (
       <div
         className={cn(
-          "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-7xl mx-auto  dark:border-neutral-700 overflow-hidden",
+          "flex flex-col md:flex-row   dark:bg-neutral-800 w-full flex-1 mx-auto  dark:border-neutral-700 overflow-hidden bg-background",
           "h-screen"
         )}>
         <Sidebar open={open} setOpen={setOpen}>
-          <SidebarBody className="justify-between gap-10  ">
-            <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
+          <SidebarBody className="justify-between gap-10 bg-secondary">
+            <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden ">
               {open ? <Logo /> : <LogoIcon />}
               <div className="mt-8 flex flex-col gap-2">
                 {links.map((link, idx) => (
@@ -40,25 +42,24 @@ export function SideBarWidget({
               </div>
             </div>
             <div>
-              <SidebarLink
+            <SidebarLink
                 link={{
-                  label: "Manu Arora",
-                  href: "#",
-                  icon: (
-                    <img
-                      src="https://assets.aceternity.com/manu.png"
-                      className="h-7 w-7 flex-shrink-0 rounded-full"
-                      width={50} 
-                      height={50}
-                      alt="Avatar"
-                    />
-                  ),
+                    label: "Notifications",
+                    href: "#",
+                    icon: (
+                    <IconBell className="text-neutral-500 h-5 w-5 flex-shrink-0" />
+                    ),
                 }}
-              />
+                />
             </div>
           </SidebarBody>
         </Sidebar>
-        {children}
+        <ScrollArea className="h-screen w-screen ">
+            <div className=" h-full w-screen">
+                {children}
+            </div>
+            <ScrollBar className="visible z-[100]" orientation="vertical" />
+        </ScrollArea>
       </div>
     );
   }
