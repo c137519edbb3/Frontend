@@ -1,5 +1,6 @@
 // components/VideoUploader.tsx
 // components/VideoUploader.tsx
+import { IconUpload } from '@tabler/icons-react';
 import { ChangeEvent } from 'react';
 
 interface VideoUploaderProps {
@@ -23,18 +24,23 @@ export default function VideoUploader({
 
   return (
     <div className="space-y-4">
-      <input
-        type="file"
-        accept="video/*"
-        onChange={handleVideoUpload}
-        disabled={isProcessing}
-        className="block w-full text-sm text-gray-500
-          file:mr-4 file:py-2 file:px-4
-          file:rounded-full file:border-0
-          file:text-sm file:font-semibold
-          file:bg-violet-50 file:text-violet-700
-          hover:file:bg-violet-100"
-      />
+      <div className="flex items-center space-x-2 mt-16">
+        <label
+          htmlFor="video-upload"
+          className="flex items-center space-x-2 bg-accent p-2 rounded cursor-pointer text-sm text-gray-500 file:font-semibold"
+        >
+          <IconUpload className="text-gray-500 h-6 w-6" />
+          <span className="text-gray-700">Upload Video</span>
+        </label>
+        <input
+          id="video-upload"
+          type="file"
+          accept="video/*"
+          onChange={handleVideoUpload}
+          disabled={isProcessing}
+          className="hidden" // Hides the input
+        />
+      </div>
       {videoUrl && (
         <video id="video-preview" controls className="max-w-full h-auto">
           <source src={videoUrl} type="video/mp4" />

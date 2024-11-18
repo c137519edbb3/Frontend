@@ -15,7 +15,8 @@ import {
   IconUsers, 
   IconDevices, 
   IconFileText, 
-  IconSettings 
+  IconSettings, 
+  IconDimensions
 } from "@tabler/icons-react"; // Import the icons
 
 const links = [
@@ -59,6 +60,13 @@ const links = [
     href: "#",
     icon: (
       <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Demo",
+    href: "/demo",
+    icon: (
+      <IconDimensions className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
     ),
   },
 ];

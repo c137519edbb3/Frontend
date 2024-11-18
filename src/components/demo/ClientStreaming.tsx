@@ -140,7 +140,7 @@ export default function ClientStreaming({
         <button
           onClick={startStreaming}
           disabled={!videoUrl}
-          className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+          className="bg-primary text-white px-4 py-2 rounded disabled:bg-gray-300"
         >
           Start Streaming
         </button>
