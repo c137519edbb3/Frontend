@@ -16,13 +16,13 @@ jobs:
 
       - name: Build React Docker Image
         run: |
-          docker build . -t frontend:latest
+          docker build . -t next-app
           echo "Docker image built successfully"
           echo "Local Docker images:"
           docker images
 
       - name: Run React Docker Contianer
-        run: docker run --name frontend_test_container -d frontend:latest
+        run: docker run --name frontend_test_container -d next-app
 
       - name: Check if container is ran successfully
         run: |
