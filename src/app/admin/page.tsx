@@ -13,9 +13,9 @@ function Dashboard() {
         <BentoGridItem
           key={i}
           title={item.title}
-          description={item.description}
+          // description={item.description}
           header={item.header} // Render the video player here
-          icon={item.icon}
+          // icon={item.icon}
           className="bg-gray-50"
         />
       ))}

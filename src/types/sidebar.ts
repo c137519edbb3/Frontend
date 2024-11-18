@@ -7,3 +7,4 @@ interface SidebarItem {
 interface AppSidebarProps {
     items: SidebarItem[];
 }
+
