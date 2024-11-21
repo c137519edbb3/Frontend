@@ -25,6 +25,7 @@ export function SideBarWidget({
   }>) {
     
     const [open, setOpen] = useState(false);
+
     return (
       <div
         className={cn(
@@ -48,8 +49,9 @@ export function SideBarWidget({
                     href: "#",
                     icon: (
                     <IconBell className="text-neutral-500 h-5 w-5 flex-shrink-0" />
-                    ),
+                    ),                    
                 }}
+                
                 />
             </div>
           </SidebarBody>
@@ -71,7 +73,7 @@ export function SideBarWidget({
         className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
       >
         <Image
-          src="/favicon-96x96.png"
+          src="/sidebar.png"
           alt="Logo Icon"
           width={24}
           height={24}
@@ -95,7 +97,7 @@ export function SideBarWidget({
         className="font-normal flex space-x-2 items-center text-sm text-black py-1 relative z-20"
       >
         <Image
-          src="/favicon-96x96.png"
+          src="/sidebar.png"
           alt="Logo Icon"
           width={24}
           height={24}

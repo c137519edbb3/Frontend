@@ -43,7 +43,7 @@ export const adminNavbar = [
     icon: "people",
   },
   {
-    title: "Devices",
+    title: "Camera management",
     url: "#",
     icon: "devices",
   },
