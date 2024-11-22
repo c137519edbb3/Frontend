@@ -13,19 +13,20 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"; 
-import { flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel }from "@tanstack/react-table"
+import { flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel, ColumnFiltersState, getPaginationRowModel }from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { MoreHorizontal } from "lucide-react"
 
 function Anomalies() {
   const [open, setOpen] = useState(false);
+  const [pageSize, setPageSize] = useState(10);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([
     {
       title: "Students Cheating",
       description: "Make sure that students dont cheat in exams",
       cameras: ["Camera 1", "Camera 2"],
-      criticality: "critical",
+      criticality: "Critical",
       scheduledTime: { start: "08:00", end: "09:00" },
       weekdays: ["Monday", "Wednesday", "Thursday", "Friday", "Saturday"],
     },
@@ -33,18 +34,23 @@ function Anomalies() {
       title: "Students Cheating",
       description: "Make sure that students dont cheat in exams",
       cameras: ["Camera 1", "Camera 2"],
-      criticality: "critical",
+      criticality: "Critical",
       scheduledTime: { start: "08:00", end: "09:00" },
       weekdays: ["Monday", "Wednesday", "Thursday", "Friday", "Saturday"],
     },
+    
   ]);
+
+  const handleDeleteAnomaly = (index: number) => {
+    setAnomalies(anomalies.filter((_, i) => i !== index));
+  };
 
 
   const [newAnomaly, setNewAnomaly] = useState<Anomaly>({
     title: "",
     description: "",
     cameras: [],
-    criticality: "moderate",
+    criticality: "Moderate",
     scheduledTime: { start: "", end: "" },
     weekdays: [],
   });
@@ -107,7 +113,9 @@ function Anomalies() {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem>Edit Anomaly</DropdownMenuItem>
-            <DropdownMenuItem>Delete Anomaly</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleDeleteAnomaly(row.index)}>
+              Delete Anomaly
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       ),
@@ -116,15 +124,25 @@ function Anomalies() {
   ];
 
   const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
 
   const table = useReactTable({
     data: anomalies,
     columns,
-    onSortingChange: setSorting,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     state: {
       sorting,
+      columnFilters,
+    },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+    initialState: {
+      pagination: {
+        pageSize: pageSize,
+      },
     },
   });
 
@@ -137,24 +155,17 @@ function Anomalies() {
   
   const handleSaveAnomaly = (anomaly: any) => {
     console.log("Saved Anomaly:", anomaly);
+    setAnomalies([...anomalies, anomaly]);
   };
 
   const handleAddAnomaly = () => {
     setAnomalies([...anomalies, newAnomaly])
     console.log("New Anomaly:", newAnomaly)
-    setOpen(false)
-    setNewAnomaly({
-      title: "",
-      description: "",
-      cameras: [],
-      criticality: "moderate",
-      scheduledTime: { start: "", end: "" },
-      weekdays: [],
-    })
   }
   
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
+
       <Header pageName="Anomaly management" userName="John Doe" userEmail="6oFkI@example.com" />
       
       <Tabs defaultValue="overview" className="w-full">
@@ -165,38 +176,60 @@ function Anomalies() {
       </Tabs>
 
       <div className="flex justify-between items-center w-full">
-        <div className="flex items-center">
-          <Input placeholder="Search anomalies..." className="max-w-sm" />
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="Filter by anomaly title..."
+            value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+            onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
+            className="max-w-sm"
+          />
+          <Select
+            value={pageSize.toString()}
+            onValueChange={(value) => {
+              setPageSize(Number(value));
+              table.setPageSize(Number(value));
+            }}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select rows per page" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {[5, 10, 20, 100].map((size) => (
+                  <SelectItem key={size} value={size.toString()}>
+                    {size} rows per page
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
-        <div className="flex ">
+        <div className="flex">
           <AnomalyFormDialog cameraOptions={cameraOptions} onSave={handleSaveAnomaly} />
         </div>
       </div>
 
-
       <div className="rounded-md border">
-
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
                   <TableHead key={header.id}>
-                    {header.isPlaceholder ? null : flexRender(
-                      header.column.columnDef.header,
-                      header.getContext()
-                    )}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(header.column.columnDef.header, header.getContext())}
                   </TableHead>
                 ))}
               </TableRow>
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.length ? (
+            {table.getRowModel().rows?.length ? (
               table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} >
+                    <TableCell key={cell.id}>
                       {flexRender(cell.column.columnDef.cell, cell.getContext())}
                     </TableCell>
                   ))}
@@ -205,7 +238,7 @@ function Anomalies() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No anomalies found.
+                  No results.
                 </TableCell>
               </TableRow>
             )}
@@ -213,10 +246,31 @@ function Anomalies() {
         </Table>
       </div>
 
-      
-
-      
+      <div className="flex items-center justify-end space-x-2 py-4">
+        <div className="flex-1 text-sm text-muted-foreground">
+          Showing {table.getRowModel().rows.length} of {anomalies.length} anomalies
+        </div>
+        <div className="space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            Previous
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            Next
+          </Button>
+        </div>
+      </div>
     </div>
+    
   )
 }
 

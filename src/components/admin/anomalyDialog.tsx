@@ -21,22 +21,47 @@ interface AnomalyFormProps {
 }
 
 const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }) => {
+    const [open, setOpen] = useState(false);
+
     const [newAnomaly, setNewAnomaly] = useState<Anomaly>({
       title: "",
       description: "",
       cameras: [],
       scheduledTime: { start: "", end: "" },
-      criticality: "moderate",
+      criticality: "Moderate",
       weekdays: [],
     });
   
     const handleSave = () => {
-      onSave(newAnomaly);
+      // Create a new anomaly object from the form data
+      const anomalyToSave = {
+        ...newAnomaly,
+        // Ensure cameras is an array of strings
+        cameras: Array.isArray(newAnomaly.cameras) ? newAnomaly.cameras : [],
+        // Ensure weekdays is an array of strings
+        weekdays: Array.isArray(newAnomaly.weekdays) ? newAnomaly.weekdays : [],
+      };
+  
+      // Call the onSave prop with the new anomaly
+      onSave(anomalyToSave);
+      
+      // Reset form
+      setNewAnomaly({
+        title: "",
+        description: "",
+        cameras: [],
+        scheduledTime: { start: "", end: "" },
+        criticality: "Moderate",
+        weekdays: [],
+      });
+      
+      // Close the dialog
+      setOpen(false);
     };
   
+  
     return (
-      <div>
-        <Dialog>
+        <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
             <Button variant="outline">Add Anomaly</Button>
           </DialogTrigger>
@@ -177,7 +202,7 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" className="bg-neutral-600">
+              <Button type="button" variant="outline" onClick={() => setOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit" onClick={handleSave}>
@@ -186,7 +211,6 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
             </DialogFooter>
           </DialogContent>
         </Dialog>
-      </div>
     );
   };
   
