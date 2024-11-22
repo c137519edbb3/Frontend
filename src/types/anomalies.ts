@@ -1,4 +1,5 @@
 interface Anomaly {
+    id: number;
     title: string;
     description: string;
     cameras: string[];

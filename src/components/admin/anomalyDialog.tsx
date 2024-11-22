@@ -24,6 +24,7 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
     const [open, setOpen] = useState(false);
 
     const [newAnomaly, setNewAnomaly] = useState<Anomaly>({
+      id: Date.now(),
       title: "",
       description: "",
       cameras: [],
@@ -33,20 +34,16 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
     });
   
     const handleSave = () => {
-      // Create a new anomaly object from the form data
       const anomalyToSave = {
         ...newAnomaly,
-        // Ensure cameras is an array of strings
         cameras: Array.isArray(newAnomaly.cameras) ? newAnomaly.cameras : [],
-        // Ensure weekdays is an array of strings
         weekdays: Array.isArray(newAnomaly.weekdays) ? newAnomaly.weekdays : [],
       };
-  
-      // Call the onSave prop with the new anomaly
       onSave(anomalyToSave);
       
       // Reset form
       setNewAnomaly({
+        id: Date.now(),
         title: "",
         description: "",
         cameras: [],
@@ -163,9 +160,9 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
                   </SelectTrigger>
                   <SelectContent className="col-span-3">
                     <SelectGroup>
-                      <SelectItem value="moderate">Moderate</SelectItem>
-                      <SelectItem value="critical">Critical</SelectItem>
-                      <SelectItem value="catastrophic">Catastrophic</SelectItem>
+                      <SelectItem value="Moderate">Moderate</SelectItem>
+                      <SelectItem value="Critical">Critical</SelectItem>
+                      <SelectItem value="Catastrophic">Catastrophic</SelectItem>
                     </SelectGroup>
                   </SelectContent>
                 </Select>

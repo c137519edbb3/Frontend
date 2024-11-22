@@ -15,14 +15,17 @@ import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"; 
 import { flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel, ColumnFiltersState, getPaginationRowModel }from "@tanstack/react-table"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { Edit, MoreHorizontal, Trash } from "lucide-react"
+import EditAnomalyFormDialog from "@/components/admin/editAnomaly"
 
 function Anomalies() {
   const [open, setOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
+  const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([
     {
+      id: Date.now(),
       title: "Students Cheating",
       description: "Make sure that students dont cheat in exams",
       cameras: ["Camera 1", "Camera 2"],
@@ -31,6 +34,7 @@ function Anomalies() {
       weekdays: ["Monday", "Wednesday", "Thursday", "Friday", "Saturday"],
     },
     {
+      id: Date.now()+1000,
       title: "Students Cheating",
       description: "Make sure that students dont cheat in exams",
       cameras: ["Camera 1", "Camera 2"],
@@ -41,12 +45,16 @@ function Anomalies() {
     
   ]);
 
-  const handleDeleteAnomaly = (index: number) => {
-    setAnomalies(anomalies.filter((_, i) => i !== index));
+  const handleDeleteClick = (anomalyId: number) => {
+    setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
   };
 
+  const handleEditClick = (anomaly: Anomaly) => {
+    setEditingAnomaly(anomaly);
+  };
 
   const [newAnomaly, setNewAnomaly] = useState<Anomaly>({
+    id: Date.now(),
     title: "",
     description: "",
     cameras: [],
@@ -62,6 +70,15 @@ function Anomalies() {
     "Camera 3",
     "Camera 4",
   ].map((camera) => ({ label: camera, value: camera }));
+
+  const handleEditAnomaly = (updatedAnomaly: Anomaly) => {
+    setAnomalies(anomalies.map(anomaly => 
+      anomaly.id === updatedAnomaly.id ? updatedAnomaly : anomaly
+    ));
+    setEditingAnomaly(null);
+  };
+
+ 
   
   const columns = [
     {
@@ -104,23 +121,20 @@ function Anomalies() {
       id: "actions",
       header: "Actions",
       cell: ({ row }: any) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>Edit Anomaly</DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleDeleteAnomaly(row.index)}>
-              Delete Anomaly
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex space-x-4">
+          <EditAnomalyFormDialog
+            cameraOptions={cameraOptions}
+            initialAnomaly={row.original} 
+            onSave={handleEditAnomaly}
+          />
+          <Trash
+            className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-red-500"
+            onClick={() => handleDeleteClick(row.original.id)}
+          />
+        </div>
       ),
-      enableSorting: false,
-    },
+    }
+    
   ];
 
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -245,6 +259,8 @@ function Anomalies() {
           </TableBody>
         </Table>
       </div>
+
+      
 
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
