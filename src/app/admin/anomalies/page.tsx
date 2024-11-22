@@ -18,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Edit, MoreHorizontal, Trash } from "lucide-react"
 import EditAnomalyFormDialog from "@/components/admin/editAnomaly"
+import { Graph1 } from "@/components/admin/anomalyChart1"
+import { Graph2 } from "@/components/admin/anomalyChart2"
 
 function Anomalies() {
   const [open, setOpen] = useState(false);
@@ -189,6 +191,7 @@ function Anomalies() {
         </TabsList>
       </Tabs>
 
+      
       <div className="flex justify-between items-center w-full">
         <div className="flex items-center gap-4">
           <Input
@@ -285,6 +288,19 @@ function Anomalies() {
           </Button>
         </div>
       </div>
+
+
+      <div className="flex  gap-4 h-64">
+        <div className=" w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
+          <Graph1 />
+        </div>
+        
+        <div className="  w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
+          <Graph2/>
+        </div>
+      </div>
+
+
     </div>
     
   )
