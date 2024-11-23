@@ -29,8 +29,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
     setIsLoading(true)
-    // login('adfadsfs');
-    // setIsLoading(false)
+    login('adfadsfs');
+    setIsLoading(false)
     
     // try {
     //   const response = await fetch("http://localhost:8000/api/v1/login", {
