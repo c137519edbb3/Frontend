@@ -1,10 +1,16 @@
+'use client'
 import CameraGrid from "@/components/admin/CameraGrid";
 import Header from "@/components/common/navbar"
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera } from "@/types/camera";
 import { GetServerSideProps } from "next";
+import { useState } from "react";
 
 
 
@@ -21,7 +27,7 @@ const mockCameras: Camera[] = [
     state: "connected",
     location: "Main Entrance",
     model: "Axis P1445-LE",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   },
   {
     id: "2",
@@ -29,7 +35,7 @@ const mockCameras: Camera[] = [
     state: "running",
     location: "Building Lobby",
     model: "Hikvision DS-2CD2345",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   },
   {
     id: "3",
@@ -37,7 +43,7 @@ const mockCameras: Camera[] = [
     state: "disconnected",
     location: "Parking Lot",
     model: "Dahua IPC-HFW4831E",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   },
   {
     id: "4",
@@ -45,7 +51,7 @@ const mockCameras: Camera[] = [
     state: "connected",
     location: "Office Hall",
     model: "Bosch FLEXIDOME IP",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   },
   {
     id: "5",
@@ -53,7 +59,7 @@ const mockCameras: Camera[] = [
     state: "running",
     location: "Warehouse",
     model: "Samsung SNH-P6410BN",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   },
   {
     id: "6",
@@ -61,7 +67,7 @@ const mockCameras: Camera[] = [
     state: "connected",
     location: "Server Room",
     model: "Logitech Circle View",
-    imageUrl: ""
+    ipAddress: '237.84.2.178',
   }
 ];
 
@@ -101,31 +107,136 @@ const youtubeLinks = [
 
 
 const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
+  const [newCamera, setNewCamera] = useState<Camera | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    location: "",
+    model: "",
+    ipAddress: "",
+  });
+  const [formError, setFormError] = useState("");
+
+  
+  
+
+  // Handle input changes
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
+  };
+
+  // Handle form submission
+  const handleSaveCamera = () => {
+    if (!formData.name || !formData.location || !formData.model || !formData.ipAddress) {
+      setFormError("All fields are required!");
+      return;
+    }
+    const newCameraData: Camera = {
+      id: String(cameras.length + 1),
+      name: formData.name,
+      location: formData.location,
+      model: formData.model,
+      ipAddress: formData.ipAddress,
+      state: "connected", // Set a valid state value
+    };
+    mockCameras.push(newCameraData); // Add new camera to mock data
+    setNewCamera(newCameraData); // Update state
+    setOpenDialog(false); // Close the dialog
+    setFormData({ name: "", location: "", model: "", ipAddress: "" }); // Reset form
+    setFormError(""); // Reset error message
+  };
+  
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
       <Header pageName="Camera Management" userName="John Doe" userEmail="6oFkI@example.com" />
 
       <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-secondary">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="help">Helps & Docs</TabsTrigger>
-          <TabsTrigger value="alerts">Alerts</TabsTrigger>
-        </TabsList>
+          <TabsList className="bg-secondary">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="help">Help & Docs</TabsTrigger>
+            <TabsTrigger value="alerts">Alerts</TabsTrigger>
+          </TabsList>
+
         
-        <TabsContent value="overview">
-          <div className="flex items-center pt-8 justify-between">
+          <TabsContent value="overview">
+          <div className="flex justify-between items-center mb-4">
             <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight pl-1">
-                View your cameras
-              </h2>
-              <p className="text-sm text-muted-foreground pl-1">
-                All Cameras under your organization.
-              </p>
+              <h2 className="text-2xl font-semibold tracking-tight pl-1">View your cameras</h2>
+              <p className="text-sm text-muted-foreground pl-1">All Cameras under your organization.</p>
             </div>
+            <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+              <DialogTrigger asChild>
+                <Button className="bg-background hover:bg-background border-2 text-primary" onClick={() => setOpenDialog(true)}>
+                  Add New Camera
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                  <DialogTitle>Add New Camera</DialogTitle>
+                  <DialogDescription>Fill out the form below to add a new camera.</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="name" className="text-right">Camera Name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="location" className="text-right">Location</Label>
+                    <Input
+                      id="location"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleInputChange}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="model" className="text-right">Camera Model</Label>
+                    <Input
+                      id="model"
+                      name="model"
+                      value={formData.model}
+                      onChange={handleInputChange}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-center gap-4">
+                    <Label htmlFor="ipAddress" className="text-right">IP Address</Label>
+                    <Input
+                      id="ipAddress"
+                      name="ipAddress"
+                      value={formData.ipAddress}
+                      onChange={handleInputChange}
+                      className="col-span-3"
+                      required
+                    />
+                  </div>
+                  {formError && <p className="text-red-500 text-sm">{formError}</p>}
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setOpenDialog(false)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveCamera}>Save New Camera</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
           <Separator className="my-4" />
           <CameraGrid cameras={mockCameras} />
-
         </TabsContent>
 
         <TabsContent value="help">

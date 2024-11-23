@@ -23,6 +23,7 @@ import { Graph2 } from "@/components/admin/anomalyChart2"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import SearchBox from "@/components/common/searchBox"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
+import { Separator } from "@/components/ui/separator"
 
 function Anomalies() {
   const [pageSize, setPageSize] = useState(10);
@@ -167,6 +168,17 @@ function Anomalies() {
       
 
         <TabsContent value="overview">
+        <div className="flex items-center pt-8 justify-between">
+            <div className="space-y-1">
+              <h2 className="text-2xl font-semibold tracking-tight pl-1">
+                Add Anomalies
+              </h2>
+              <p className="text-sm text-muted-foreground pl-1">
+              You can now easily edit, update, and delete your anomalies, giving you full control to manage and maintain accurate data.
+              </p>
+            </div>
+          </div>
+          <Separator className="my-4" />
       <div className="flex justify-between items-center w-full mt-4 mb-4">
         <div className="flex items-center gap-4">
           <Input
@@ -239,6 +251,7 @@ function Anomalies() {
       </div>
 
       
+      
 
       <div className="flex items-center justify-end space-x-2 py-4">
         <div className="flex-1 text-sm text-muted-foreground">
@@ -263,9 +276,20 @@ function Anomalies() {
           </Button>
         </div>
       </div>
+      
 
-
-      <div className="flex  gap-4 h-64 pt-16">
+      <div className="flex items-center pt-16 justify-between">
+        <div className="space-y-1">
+          <h2 className="text-2xl font-semibold tracking-tight pl-1">
+            Anomaly Analytics
+          </h2>
+          <p className="text-sm text-muted-foreground pl-1">
+          You can now view detailed graphs and analytics for your anomalies, enabling you to track trends and gain valuable insights for better decision-making.
+          </p>
+        </div>
+      </div>
+      <Separator className="my-4" />
+      <div className="flex  gap-4 h-64">
         <div className=" w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
           <Graph1 />
         </div>

@@ -60,7 +60,7 @@ const CameraCard: React.FC<CameraCardProps> = ({ camera }) => {
           </AlertDialogTrigger>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure you want to delete this camera?</AlertDialogTitle>
+              <AlertDialogTitle>Are you sure you want to delete this camera: {camera.name}?</AlertDialogTitle>
               <AlertDialogDescription>
                 This action cannot be undone. The camera data will be permanently deleted.
               </AlertDialogDescription>
