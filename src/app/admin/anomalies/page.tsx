@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { MultiSelect } from "@/components/ui/multi-select"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Textarea } from "@/components/ui/textarea"
 import { useState } from "react"; 
 import { flexRender, getCoreRowModel, useReactTable, SortingState, getSortedRowModel, ColumnFiltersState, getPaginationRowModel }from "@tanstack/react-table"
@@ -20,9 +20,11 @@ import { Edit, MoreHorizontal, Trash } from "lucide-react"
 import EditAnomalyFormDialog from "@/components/admin/editAnomaly"
 import { Graph1 } from "@/components/admin/anomalyChart1"
 import { Graph2 } from "@/components/admin/anomalyChart2"
+import { ScrollArea } from "@/components/ui/scroll-area"
+import SearchBox from "@/components/common/searchBox"
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 
 function Anomalies() {
-  const [open, setOpen] = useState(false);
   const [pageSize, setPageSize] = useState(10);
   const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([
@@ -50,21 +52,6 @@ function Anomalies() {
   const handleDeleteClick = (anomalyId: number) => {
     setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
   };
-
-  const handleEditClick = (anomaly: Anomaly) => {
-    setEditingAnomaly(anomaly);
-  };
-
-  const [newAnomaly, setNewAnomaly] = useState<Anomaly>({
-    id: Date.now(),
-    title: "",
-    description: "",
-    cameras: [],
-    criticality: "Moderate",
-    scheduledTime: { start: "", end: "" },
-    weekdays: [],
-  });
-
 
   const cameraOptions = [
     "Camera 1",
@@ -162,22 +149,10 @@ function Anomalies() {
     },
   });
 
-  const handleMultiSelectChange = (selected: string[], field: string) => {
-    setNewAnomaly((prevState) => ({
-      ...prevState,
-      [field]: selected,
-    }));
-  };
-  
   const handleSaveAnomaly = (anomaly: any) => {
     console.log("Saved Anomaly:", anomaly);
     setAnomalies([...anomalies, anomaly]);
   };
-
-  const handleAddAnomaly = () => {
-    setAnomalies([...anomalies, newAnomaly])
-    console.log("New Anomaly:", newAnomaly)
-  }
   
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
@@ -189,16 +164,16 @@ function Anomalies() {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="Anomaly Logs">Anomaly Logs</TabsTrigger>
         </TabsList>
-      </Tabs>
-
       
-      <div className="flex justify-between items-center w-full">
+
+        <TabsContent value="overview">
+      <div className="flex justify-between items-center w-full mt-4 mb-4">
         <div className="flex items-center gap-4">
           <Input
             placeholder="Filter by anomaly title..."
             value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
             onChange={(event) => table.getColumn("title")?.setFilterValue(event.target.value)}
-            className="max-w-sm"
+            className="max-w-sm "
           />
           <Select
             value={pageSize.toString()}
@@ -290,7 +265,7 @@ function Anomalies() {
       </div>
 
 
-      <div className="flex  gap-4 h-64">
+      <div className="flex  gap-4 h-64 pt-16">
         <div className=" w-full sm:max-w-md md:max-w-lg lg:max-w-xl">
           <Graph1 />
         </div>
@@ -299,8 +274,41 @@ function Anomalies() {
           <Graph2/>
         </div>
       </div>
+      </TabsContent >
 
+      <TabsContent value="Anomaly Logs" className="h-[85vh] border-1 rounded mt-8">
+      
+      <ResizablePanelGroup direction="horizontal" className="w-full rounded border" >
+        <ResizablePanel defaultSize={40} minSize={20}>
+          <SearchBox />
+          <ScrollArea className="h-[85vh]">
 
+            <div className="px-4">
+              <ul className="space-y-2">
+                {Array.from({ length: 50 }, (_, i) => (
+                  <li
+                    key={i}
+                    className="p-2 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer"
+                  >
+                    Item {i + 1}
+                  </li>
+                ))}
+              </ul>
+            </div>
+            
+          </ScrollArea>
+        </ResizablePanel>
+        <ResizableHandle withHandle={true} />
+        <ResizablePanel defaultSize={60} minSize={30}>
+          <div className="bg-red">
+            <p>gergaregaer</p>
+          </div>
+        </ResizablePanel>
+      </ResizablePanelGroup>
+
+      </TabsContent>
+
+      </Tabs>
     </div>
     
   )
