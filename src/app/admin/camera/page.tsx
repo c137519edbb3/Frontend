@@ -15,9 +15,9 @@ import { useState } from "react";
 
 
 
-interface CamerasPageProps {
-  cameras: Camera[];
-}
+type CamerasPageProps = {
+  initialCameras?: Camera[];
+};
  
 
 const mockCameras: Camera[] = [
@@ -106,8 +106,8 @@ const youtubeLinks = [
 ];
 
 
-const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
-  const [newCamera, setNewCamera] = useState<Camera | null>(null);
+const CameraWidget: React.FC<CamerasPageProps> = ({ initialCameras = [] }) => {
+  const [cameras, setCameras] = useState<Camera[]>(initialCameras);
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -116,9 +116,6 @@ const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
     ipAddress: "",
   });
   const [formError, setFormError] = useState("");
-
-  
-  
 
   // Handle input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,19 +132,40 @@ const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
       setFormError("All fields are required!");
       return;
     }
+
+    
+
     const newCameraData: Camera = {
       id: String(cameras.length + 1),
       name: formData.name,
       location: formData.location,
       model: formData.model,
       ipAddress: formData.ipAddress,
-      state: "connected", // Set a valid state value
+      state: "connected",
     };
-    mockCameras.push(newCameraData); // Add new camera to mock data
-    setNewCamera(newCameraData); // Update state
-    setOpenDialog(false); // Close the dialog
-    setFormData({ name: "", location: "", model: "", ipAddress: "" }); // Reset form
-    setFormError(""); // Reset error message
+
+    // Update cameras state with the new camera
+    setCameras((prevCameras) => [...prevCameras, newCameraData]);
+    
+    // Reset form and close dialog
+    setOpenDialog(false);
+    setFormData({ name: "", location: "", model: "", ipAddress: "" });
+    setFormError("");
+  };
+
+
+  const handleUpdateCamera = (id: string, updatedData: Partial<Camera>) => {
+    setCameras(prevCameras => 
+      prevCameras.map(camera => 
+        camera.id === id
+          ? { ...camera, ...updatedData }
+          : camera
+      )
+    );
+  };
+
+  const handleDeleteCamera = (id: string) => {
+    setCameras(prevCameras => prevCameras.filter(camera => camera.id !== id));
   };
   
   return (
@@ -163,7 +181,7 @@ const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
 
         
           <TabsContent value="overview">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between pt-8 items-center mb-4">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold tracking-tight pl-1">View your cameras</h2>
               <p className="text-sm text-muted-foreground pl-1">All Cameras under your organization.</p>
@@ -236,7 +254,11 @@ const CameraWidget: React.FC<CamerasPageProps> = ({ cameras }) => {
             </Dialog>
           </div>
           <Separator className="my-4" />
-          <CameraGrid cameras={mockCameras} />
+          <CameraGrid 
+            cameras={cameras} 
+            onUpdateCamera={handleUpdateCamera}
+            onDeleteCamera={handleDeleteCamera}
+          />
         </TabsContent>
 
         <TabsContent value="help">
