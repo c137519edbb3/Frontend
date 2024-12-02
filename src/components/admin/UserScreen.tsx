@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { User } from "@/types/user";
+import { orgUsers  } from "@/types/user";
 import { GetServerSideProps } from "next";
 import { useState } from "react";
 
@@ -17,11 +17,11 @@ import { useState } from "react";
 
 
 type UsersPageProps = {
-  initialUsers?: User[];
+  initialUsers?: orgUsers[];
 };
  
 
-const mockUsers: User[] = [
+const mockUsers: orgUsers[] = [
   {
     id: "1",
     name: "Entrance User",
@@ -108,7 +108,7 @@ const youtubeLinks = [
 
 
 const UserWidget: React.FC<UsersPageProps> = ({ initialUsers = [] }) => {
-  const [Users, setUsers] = useState<User[]>(initialUsers);
+  const [Users, setUsers] = useState<orgUsers[]>(initialUsers);
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -136,7 +136,7 @@ const UserWidget: React.FC<UsersPageProps> = ({ initialUsers = [] }) => {
 
     
 
-    const newUserData: User = {
+    const newUserData: orgUsers = {
       id: String(Users.length + 1),
       name: formData.name,
       location: formData.location,
@@ -155,7 +155,7 @@ const UserWidget: React.FC<UsersPageProps> = ({ initialUsers = [] }) => {
   };
 
 
-  const handleUpdateUser = (id: string, updatedData: Partial<User>) => {
+  const handleUpdateUser = (id: string, updatedData: Partial<orgUsers>) => {
     setUsers(prevUsers => 
       prevUsers.map(User => 
         User.id === id
@@ -176,7 +176,7 @@ const UserWidget: React.FC<UsersPageProps> = ({ initialUsers = [] }) => {
       <Tabs defaultValue="overview" className="w-full">
           <TabsList className="bg-secondary">
             <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="help">Help & Docs</TabsTrigger>
+            <TabsTrigger value="help">History</TabsTrigger>
             <TabsTrigger value="alerts">Alerts</TabsTrigger>
           </TabsList>
 
@@ -263,42 +263,7 @@ const UserWidget: React.FC<UsersPageProps> = ({ initialUsers = [] }) => {
         </TabsContent>
 
         <TabsContent value="help">
-        <div className="flex items-center pt-8 justify-between">
-            <div className="space-y-1">
-              <h2 className="text-2xl font-semibold tracking-tight pl-1">
-                Useful Videos
-              </h2>
-              <p className="text-sm text-muted-foreground pl-1">
-                Videos related to User Setup and accessibility.
-              </p>
-            </div>
-          </div>
-          <Separator className="my-4" />
-        <div className="relative">
-          <ScrollArea>
-            <div className="flex space-x-4 pb-4 ">
-              {youtubeLinks.map((video) => (
-                <div key={video.url} className="w-[350px] bg-neutral-100 rounded-2xl  border-2">
-                  <iframe
-                    width="350"
-                    height="200"
-                    className="rounded-2xl"
-                    src={video.url}
-                    title={video.title}
-                    frameBorder="2"
-                    allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                  <div className="p-4">
-                    <h3 className="text-base font-semibold">{video.title}</h3>
-                    <p className="text-xs text-gray-600">{video.description}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
+         
 
         </TabsContent>
 

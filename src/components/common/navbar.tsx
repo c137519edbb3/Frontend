@@ -6,6 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuGroup, DropdownMenuItem,
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Cloud, CreditCard, Github, Keyboard, LifeBuoy, LogOut, Mail, MessageSquare, Plus, PlusCircle, SearchIcon, Settings, Shell, User, UserPlus, Users } from 'lucide-react';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
+import { signOut, useSession } from 'next-auth/react';
 
 
 const Header: React.FC<HeaderProps> = ({ pageName, userName, userEmail }) => {
@@ -114,8 +115,13 @@ interface UserProps {
     email: string;
     avatarUrl?: string;
   }
+
+  const handleLogout = () => {
+    signOut({ callbackUrl: "/auth/login" });
+  };
   
   function UserMenu({ name, email, avatarUrl }: UserProps) {
+    const { data: session } = useSession();
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -132,7 +138,9 @@ interface UserProps {
           </div>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56">
-          <DropdownMenuLabel>My Account</DropdownMenuLabel>
+          <DropdownMenuLabel>
+            {session?.user?.name ? session.user.name : "My Account"}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>
@@ -192,10 +200,7 @@ interface UserProps {
             </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
-            <Github />
-            <span>GitHub</span>
-          </DropdownMenuItem>
+           
           <DropdownMenuItem>
             <LifeBuoy />
             <span>Support</span>
@@ -205,7 +210,7 @@ interface UserProps {
             <span>API</span>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={handleLogout}>
             <LogOut />
             <span>Log out</span>
             <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut>

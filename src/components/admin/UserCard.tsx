@@ -1,5 +1,5 @@
 'use client'
-import { User } from '@/types/user';
+import { orgUsers } from '@/types/user';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Separator } from '../ui/separator';
@@ -12,9 +12,9 @@ import { Label } from '../ui/label';
 import { Input } from '../ui/input';
 
 interface UserCardProps {
-    User: User;
+    User: orgUsers;
     onDelete: (id: string) => void;
-    onUpdate: (id: string, updatedUser: Partial<User>) => void;
+    onUpdate: (id: string, updatedUser: Partial<orgUsers>) => void;
   }
 
 

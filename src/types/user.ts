@@ -1,4 +1,5 @@
-export interface User {
+// src/types/user.ts
+export interface orgUsers {
     id: string;
     name: string;
     state: 'connected' | 'running' | 'disconnected';
@@ -6,3 +7,19 @@ export interface User {
     location: string;
     model: string;
   }  
+
+  export interface User {
+    id: string;
+    username: string;
+    name: string;
+    email: string;
+    role: string;
+    organization: {
+      id: number;
+      name: string;
+    };
+    token: string;
+  }
+
+
+  

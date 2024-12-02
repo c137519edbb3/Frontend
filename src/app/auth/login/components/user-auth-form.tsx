@@ -1,3 +1,4 @@
+// src/app/auth/login/components/user-auth-form.tsx
 "use client"
 
 import * as React from "react"
@@ -9,54 +10,52 @@ import { Label } from "@/components/ui/label"
 import { Loader } from "lucide-react"
 import { IconBrandGoogle } from "@tabler/icons-react"
 import { useAuth } from "@/context/authContext"
-import { useRouter } from "next/navigation"
-
+import { useRouter, useSearchParams } from "next/navigation"
+import { signIn } from "next-auth/react"
+import { loginUser } from "@/utils/api"
+ 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const [isLoading, setIsLoading] = React.useState<boolean>(false)
-  const { isAuthenticated, login } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [credentials, setCredentials] = useState({ username: "", password: "" })
   const [error, setError] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/admin")
-    }
-  }, [isAuthenticated, router])
+  
 
   async function onSubmit(event: React.SyntheticEvent) {
     event.preventDefault()
+    setError(null)
     setIsLoading(true)
-    login('adfadsfs');
-    setIsLoading(false)
-    
-    // try {
-    //   const response = await fetch("http://localhost:8000/api/v1/login", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(credentials),
-    //   })
 
-    //   if (response.ok) {
-    //     const data = await response.json()
-    //     localStorage.setItem("access_token", data.access_token)
-    //     setError(null)
-    //     login(data.access_token)
-    //   } else {
-    //     const errorData = await response.json()
-    //     setError(errorData.detail || "Login failed. Please check your credentials.")
-    //   }
-    // } catch (error) {
-    //   setError("Invalid credentials")
-    //   console.log(error)
-    // } finally {
-    //   setIsLoading(false)
-    // }
+    try {
+      const result = await signIn('credentials', {
+        redirect: false,
+        username: credentials.username,
+        password: credentials.password,
+        callbackUrl: '/admin',
+      })
+      console.log(result);
+      if (result?.error) {
+        console.log("signIn error:", result.error);
+        setError(result.error)
+        setIsLoading(false)
+        return
+      } 
+      
+      if (result?.url) {
+        router.push(result.url); // Redirect to the URL returned by NextAuth
+      } else {
+        setError("Login failed. Please try again.");
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || 'An unexpected error occurred')
+      setIsLoading(false)
+    }
   }
+
 
   const onChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setCredentials({ ...credentials, [e.target.id]: e.target.value })
@@ -70,7 +69,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
             <Label htmlFor="username">Username</Label>
             <Input
               id="username"
-              placeholder="admin"
+              placeholder="ahmed@gmail.com"
               type="text"
               autoCapitalize="none"
               autoComplete="username"

@@ -1,13 +1,13 @@
 
 import UserWidget from "@/components/admin/UserScreen";
-import { User } from "@/types/user";
+import { orgUsers } from "@/types/user";
 
 type UsersPageProps = {
-  initialUsers?: User[];
+  initialUsers?: orgUsers[];
 };
  
 
-const mockUsers: User[] = [
+const mockUsers: orgUsers[] = [
   {
     id: "1",
     name: "Entrance User",

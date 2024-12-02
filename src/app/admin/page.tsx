@@ -88,6 +88,9 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import Header from '@/components/common/navbar';
+import { useRouter } from 'next/router';
+import { useSession } from 'next-auth/react';
+import { redirect } from 'next/navigation';
 const chartData = [
   { date: "2024-04-01", High: 222, moderate: 150 },
   { date: "2024-04-02", High: 97, moderate: 180 },
@@ -498,6 +501,19 @@ const CameraDetailsGrid = () => {
 };
 
 export default function Dashboard({ }) {
+  
+  const { data: session, status } = useSession();
+
+  
+  if (status === 'loading') {
+    return <p>Loading...</p>;
+  }
+
+  if (!session) {
+    redirect('/auth/login'); 
+  }
+
+  
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
       <Header pageName="Dashboard" userName="John Doe" userEmail="6oFkI@example.com" />

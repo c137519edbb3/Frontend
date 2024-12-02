@@ -1,6 +1,5 @@
 "use client"
 import Image from "next/image";
-import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Sidebar, SidebarBody,  SidebarLink, SidebarProvider} from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
@@ -21,6 +20,8 @@ import {
   IconCamera,
   IconReportAnalytics
 } from "@tabler/icons-react"; // Import the icons
+import { useRouter } from "next/router";
+import { SessionProvider, useSession } from "next-auth/react";
 
 const links = [
   {
@@ -87,12 +88,14 @@ export default function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+
   return (
-    <ProtectedRoute>
+    <SessionProvider>
         <main>
         <SideBarWidget  links={links}>{children} </SideBarWidget>          
         </main>      
-    </ProtectedRoute>
+    </SessionProvider>
   );
 }
 

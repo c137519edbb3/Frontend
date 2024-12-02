@@ -59,7 +59,7 @@ export default function AuthenticationPage() {
               <p className="text-lg">
                 &ldquo;This system allows me to manage critical anomalies effectively by offering real-time monitoring, simple editing, and easy scheduling—all through a user-friendly platform.&rdquo;
               </p>
-              <footer className="text-sm">Sofia Davis</footer>
+              {/* <footer className="text-sm">Sofia Davis</footer> */}
             </blockquote>
           </div>
         </div>

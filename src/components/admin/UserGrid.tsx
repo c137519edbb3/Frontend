@@ -1,11 +1,11 @@
  
 
-import { User } from '@/types/user';
+import { orgUsers } from '@/types/user';
 import UserCard from './UserCard'
 
 interface UserGridProps {
-  Users: User[];
-  onUpdateUser: (id: string, updatedUser: Partial<User>) => void;
+  Users: orgUsers[];
+  onUpdateUser: (id: string, updatedUser: Partial<orgUsers>) => void;
   onDeleteUser: (id: string) => void;
 }
 
