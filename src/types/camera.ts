@@ -1,8 +1,7 @@
 export interface Camera {
-    id: string;
-    name: string;
-    state: 'connected' | 'running' | 'disconnected';
+    cameraId: string;
+    status: 'ONLINE' | 'OFFLINE';
     ipAddress: string;
     location: string;
-    model: string;
+    cameraType: string;
   }  

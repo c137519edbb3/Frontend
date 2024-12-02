@@ -1,6 +1,5 @@
 "use client"
 
-import ProtectedRoute from "@/components/common/ProtectedRoute";
 import { Sidebar, SidebarBody,  SidebarLink, SidebarProvider} from "@/components/ui/sidebar"
 import { cn } from "@/lib/utils";
 import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from "@tabler/icons-react";
@@ -24,16 +23,11 @@ export default function SuperAdminLayout({
     //     </main>
     //   </SidebarProvider>
     // </ProtectedRoute>
-    <ProtectedRoute>
-       {/* <SidebarHeader />
-      <SidebarProvider>
-        <AppSidebar /> */}
-        <SidebarDemo/>
+
         <main>
           {children}
         </main>
       
-    </ProtectedRoute>
   );
 }
 

@@ -12,7 +12,7 @@ import { IconBrandGoogle } from "@tabler/icons-react"
 import { useAuth } from "@/context/authContext"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
-import { loginUser } from "@/utils/api"
+import { loginUser } from "@/utils/auth-api"
  
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -36,7 +36,7 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
         password: credentials.password,
         callbackUrl: '/admin',
       })
-      console.log(result);
+      // console.log(result);
       if (result?.error) {
         console.log("signIn error:", result.error);
         setError(result.error)

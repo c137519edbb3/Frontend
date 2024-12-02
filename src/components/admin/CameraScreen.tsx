@@ -9,8 +9,11 @@ import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Camera } from "@/types/camera";
+import { addCamera, deleteCamera, updateCamera } from "@/utils/camera-api";
 import { GetServerSideProps } from "next";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 
 
@@ -19,58 +22,7 @@ interface CameraWidgetProps {
   initialCameras?: Camera[];
 }
  
-
-const mockCameras: Camera[] = [
-  {
-    id: "1",
-    name: "Entrance Camera",
-    state: "connected",
-    location: "Main Entrance",
-    model: "Axis P1445-LE",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "2",
-    name: "Lobby Camera",
-    state: "running",
-    location: "Building Lobby",
-    model: "Hikvision DS-2CD2345",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "3",
-    name: "Parking Lot Camera",
-    state: "disconnected",
-    location: "Parking Lot",
-    model: "Dahua IPC-HFW4831E",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "4",
-    name: "Office Hall Camera",
-    state: "connected",
-    location: "Office Hall",
-    model: "Bosch FLEXIDOME IP",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "5",
-    name: "Warehouse Camera",
-    state: "running",
-    location: "Warehouse",
-    model: "Samsung SNH-P6410BN",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "6",
-    name: "Server Room Camera",
-    state: "connected",
-    location: "Server Room",
-    model: "Logitech Circle View",
-    ipAddress: '237.84.2.178',
-  }
-];
-
+ 
  
 const youtubeLinks = [
   {
@@ -106,13 +58,14 @@ const youtubeLinks = [
 ];
 
 
-const CameraWidget = ({ initialCameras = mockCameras }: CameraWidgetProps) => {
+const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
+  const { data: session } = useSession(); 
   const [cameras, setCameras] = useState<Camera[]>(initialCameras);
   const [openDialog, setOpenDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     location: "",
-    model: "",
+    cameraType: "",
     ipAddress: "",
   });
   const [formError, setFormError] = useState("");
@@ -127,46 +80,122 @@ const CameraWidget = ({ initialCameras = mockCameras }: CameraWidgetProps) => {
   };
 
   // Handle form submission
-  const handleSaveCamera = () => {
-    if (!formData.name || !formData.location || !formData.model || !formData.ipAddress) {
+  const handleSaveCamera = async () => {
+    if ( !formData.location || !formData.cameraType || !formData.ipAddress) {
       setFormError("All fields are required!");
       return;
     }
 
-    
+    if (!session) {
+      console.error("User is not authenticated");
+      return;
+    }
+
+    const { accessToken, user } = session;
+    if (!user || !user.organization || !user.organization.id) {
+      console.error("Organization information is missing from the session");
+      return;
+    }
+
+    const organizationId = user.organization.id;
 
     const newCameraData: Camera = {
-      id: String(cameras.length + 1),
-      name: formData.name,
+      cameraId: String(cameras.length + 1),
       location: formData.location,
-      model: formData.model,
+      cameraType: formData.cameraType,
       ipAddress: formData.ipAddress,
-      state: "connected",
+      status: "ONLINE",
     };
 
-    // Update cameras state with the new camera
-    setCameras((prevCameras) => [...prevCameras, newCameraData]);
-    
+    try {
+      // console.log(newCameraData);
+      const newCamera = await addCamera(organizationId, newCameraData, accessToken);
+  
+      setCameras((prevCameras) => [...prevCameras, newCamera]);      
+      console.log("Added camera:", newCamera);
+      toast(`New Camera has been added.`);
+    } catch (error) {
+      console.error("Error adding camera:", error);
+    }
     // Reset form and close dialog
     setOpenDialog(false);
-    setFormData({ name: "", location: "", model: "", ipAddress: "" });
+    setFormData({ name: "", location: "", cameraType: "", ipAddress: "" });
     setFormError("");
   };
 
 
-  const handleUpdateCamera = (id: string, updatedData: Partial<Camera>) => {
-    setCameras(prevCameras => 
-      prevCameras.map(camera => 
-        camera.id === id
-          ? { ...camera, ...updatedData }
-          : camera
-      )
-    );
+
+  const handleUpdateCamera = async (cameraId: string, updatedData: Partial<Camera>) => {
+    if (!session) {
+      console.error("User is not authenticated");
+      return;
+    }
+    const { accessToken, user } = session;
+    if (!user || !user.organization || !user.organization.id) {
+      console.error("Organization information is missing from the session");
+      return;
+    }
+
+    const organizationId = user.organization.id;
+    console.log('updatedData:',updatedData);
+    try {
+      const updatedCamera = await updateCamera(
+        organizationId,
+        parseInt(cameraId),
+        updatedData,
+        accessToken
+      );
+      
+      if (updatedCamera) {
+        setCameras((prevCameras) => 
+          prevCameras.map((camera) => 
+            camera.cameraId === cameraId
+              ? { ...camera, ...updatedData }
+              : camera
+          )
+        );
+        console.log("Updated camera:", updatedCamera);
+        toast(`Your Camera has been updated.`);
+      }
+    } catch (error) {
+      console.error("Error updating camera:", error);
+    }
   };
 
-  const handleDeleteCamera = (id: string) => {
-    setCameras(prevCameras => prevCameras.filter(camera => camera.id !== id));
+  const handleDeleteCamera = async (cameraId: string) => {
+  
+    if (!session) {
+      console.error("User is not authenticated");
+      return;
+    }
+  
+    const { accessToken, user } = session;
+  
+    if (!user || !user.organization || !user.organization.id) {
+      console.error("Organization information is missing from the session");
+      return;
+    }
+  
+    const organizationId = user.organization.id;  // Extract the organization ID from the session
+  
+    try {
+      const response = await deleteCamera(
+        organizationId,
+        parseInt(cameraId),  // Convert cameraId to number
+        accessToken
+      );
+  
+      if (response.success) {
+        // Remove the camera from the state after successful deletion
+        setCameras(prevCameras => prevCameras.filter(camera => camera.cameraId !== cameraId));
+        console.log(response.message);  // You can display this message in the UI
+        toast(`Camera has been deleted.`);
+      }
+    } catch (error) {
+      console.error("Error deleting camera:", error);
+    }
   };
+  
   
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
@@ -198,19 +227,9 @@ const CameraWidget = ({ initialCameras = mockCameras }: CameraWidgetProps) => {
                   <DialogDescription>Fill out the form below to add a new camera.</DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4 py-4">
+ 
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="name" className="text-right">Camera Name</Label>
-                    <Input
-                      id="name"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="col-span-3"
-                      required
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="location" className="text-right">Location</Label>
+                    <Label htmlFor="location" className="text-right">Location Name</Label>
                     <Input
                       id="location"
                       name="location"
@@ -221,11 +240,11 @@ const CameraWidget = ({ initialCameras = mockCameras }: CameraWidgetProps) => {
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">
-                    <Label htmlFor="model" className="text-right">Camera Model</Label>
+                    <Label htmlFor="cameraType" className="text-right">Camera Model</Label>
                     <Input
-                      id="model"
-                      name="model"
-                      value={formData.model}
+                      id="cameraType"
+                      name="cameraType"
+                      value={formData.cameraType}
                       onChange={handleInputChange}
                       className="col-span-3"
                       required

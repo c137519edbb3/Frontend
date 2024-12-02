@@ -1,7 +1,7 @@
 // src/lib/auth.ts
 
 import { User } from "@/types/user";
-import { loginUser } from "@/utils/api";
+import { loginUser } from "@/utils/auth-api";
 import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
  

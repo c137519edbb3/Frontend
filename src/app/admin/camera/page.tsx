@@ -1,65 +1,38 @@
+export const dynamic = 'force-dynamic';
+
 import CameraWidget from "@/components/admin/CameraScreen";
-import { Camera } from "@/types/camera";
-
-const mockCameras: Camera[] = [
-  {
-    id: "1",
-    name: "Entrance Camera",
-    state: "connected",
-    location: "Main Entrance",
-    model: "Axis P1445-LE",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "2",
-    name: "Lobby Camera",
-    state: "running",
-    location: "Building Lobby",
-    model: "Hikvision DS-2CD2345",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "3",
-    name: "Parking Lot Camera",
-    state: "disconnected",
-    location: "Parking Lot",
-    model: "Dahua IPC-HFW4831E",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "4",
-    name: "Office Hall Camera",
-    state: "connected",
-    location: "Office Hall",
-    model: "Bosch FLEXIDOME IP",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "5",
-    name: "Warehouse Camera",
-    state: "running",
-    location: "Warehouse",
-    model: "Samsung SNH-P6410BN",
-    ipAddress: '237.84.2.178',
-  },
-  {
-    id: "6",
-    name: "Server Room Camera",
-    state: "connected",
-    location: "Server Room",
-    model: "Logitech Circle View",
-    ipAddress: '237.84.2.178',
-  }
-];
-
+import { authOptions } from "@/lib/auth";
+import { Camera } from "@/types/camera"; 
+import { fetchCameras } from "@/utils/camera-api";
+import { getServerSession } from "next-auth";
+ 
 interface PageProps {
   params: {};
   searchParams: {};
 }
 
 export default async function CameraPage(props: PageProps) {
-  return <CameraWidget initialCameras={mockCameras} />;
-}
+  try {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.organization?.id || !session?.user?.token) {
+      console.error("Session not found or missing required details");
+      throw new Error("Session not found or missing required details");
+    }
 
-// Explicitly declare that this page has no generateMetadata function
-export const generateMetadata = undefined;
+    const organizationId = session.user.organization.id;
+    const token = session.user.token;
+
+    const cameras: Camera[] = await fetchCameras(organizationId, token);
+    // console.log("Cameras:", cameras);
+    return <CameraWidget initialCameras={cameras} />;
+  } catch (error) {
+    console.error("Error fetching cameras:", error);
+    
+    return (
+      <div>
+        <h1>Error</h1>
+        <p>Failed to load camera data. Please try again later.</p>
+      </div>
+    );
+  }
+}

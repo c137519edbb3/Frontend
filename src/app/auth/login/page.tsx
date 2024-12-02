@@ -5,6 +5,7 @@ import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { UserAuthForm } from "./components/user-auth-form"
+import { Suspense } from "react"
 
 
 
@@ -73,7 +74,9 @@ export default function AuthenticationPage() {
                 Enter your email below to login to your account
               </p>
             </div>
-            <UserAuthForm />
+            <Suspense fallback={<div>Loading...</div>}>
+              <UserAuthForm />
+            </Suspense>
             <p className="px-8 text-center text-sm text-muted-foreground">
               By clicking continue, you agree to our{" "}
               <Link

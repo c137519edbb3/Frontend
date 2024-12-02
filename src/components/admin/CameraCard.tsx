@@ -21,17 +21,15 @@ interface CameraCardProps {
 
   const CameraCard: React.FC<CameraCardProps> = ({ camera, onDelete, onUpdate }) => {
     const [editFormData, setEditFormData] = useState({
-      name: camera.name,
       location: camera.location,
-      model: camera.model,
+      cameraType: camera.cameraType,
       ipAddress: camera.ipAddress,
     });
     const [isSheetOpen, setIsSheetOpen] = useState(false);
   
     const stateColors = {
-      connected: 'bg-green-500',
-      running: 'bg-blue-500',
-      disconnected: 'bg-red-500'
+      ONLINE: 'bg-green-500',
+      OFFLINE: 'bg-red-500'
     };
   
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -43,7 +41,7 @@ interface CameraCardProps {
     };
   
     const handleSaveChanges = () => {
-      onUpdate(camera.id, editFormData);
+      onUpdate(camera.cameraId, editFormData);
       setIsSheetOpen(false);
     };
   
@@ -51,21 +49,21 @@ interface CameraCardProps {
       <div className="border-2 border-dashed rounded-lg overflow-hidden relative group">
         <div className="p-0">
           <div className="flex justify-between items-center h-full w-full bg-gray-100 p-4 rounded-md">
-            <h3 className="text-lg font-semibold">{camera.name}</h3>
+            <h3 className="text-lg font-semibold">{camera.location}</h3>
             <TooltipProvider delayDuration={100} skipDelayDuration={100}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <span className={`inline-block w-3 h-3 rounded-full ${stateColors[camera.state]}`}></span>
+                  <span className={`inline-block w-3 h-3 rounded-full ${stateColors[camera.status]}`}></span>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <span className="text-sm capitalize">{camera.state}</span>
+                  <span className="text-sm capitalize">{camera.status}</span>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
           </div>
   
-          <p className="text-sm text-gray-600 px-4 py-1">{camera.location}</p>
-          <p className="text-sm text-gray-600 px-4 py-1 mb-4">{camera.model}</p>
+          <p className="text-sm text-gray-600 px-4 py-1">{camera.cameraType}</p>
+          <p className="text-sm text-gray-600 px-4 py-1 mb-4">{camera.ipAddress}</p>
         </div>
   
         {/* Edit and Delete Buttons */}
@@ -84,18 +82,9 @@ interface CameraCardProps {
                 </SheetDescription>
               </SheetHeader>
               <div className="grid gap-4 py-4">
+                 
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="name" className="text-right">Camera Name</Label>
-                  <Input
-                    id="name"
-                    name="name"
-                    value={editFormData.name}
-                    onChange={handleInputChange}
-                    className="col-span-3"
-                  />
-                </div>
-                <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="location" className="text-right">Location</Label>
+                  <Label htmlFor="location" className="text-right">Location Name</Label>
                   <Input
                     id="location"
                     name="location"
@@ -105,11 +94,11 @@ interface CameraCardProps {
                   />
                 </div>
                 <div className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor="model" className="text-right">Model</Label>
+                  <Label htmlFor="cameraType" className="text-right">Model</Label>
                   <Input
-                    id="model"
-                    name="model"
-                    value={editFormData.model}
+                    id="cameraType"
+                    name="cameraType"
+                    value={editFormData.cameraType}
                     onChange={handleInputChange}
                     className="col-span-3"
                   />
@@ -139,14 +128,14 @@ interface CameraCardProps {
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you sure you want to delete this camera: {camera.name}?</AlertDialogTitle>
+                <AlertDialogTitle>Are you sure you want to delete this camera: {camera.location}?</AlertDialogTitle>
                 <AlertDialogDescription>
                   This action cannot be undone. The camera data will be permanently deleted.
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={() => onDelete(camera.id)}>Delete</AlertDialogAction>
+                <AlertDialogAction onClick={() => onDelete(camera.cameraId)}>Delete</AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

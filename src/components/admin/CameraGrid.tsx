@@ -18,7 +18,7 @@ const CameraGrid: React.FC<CameraGridProps> = ({ cameras = [], onUpdateCamera, o
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {cameras.map((camera) => (
         <CameraCard 
-          key={camera.id} 
+          key={camera.cameraId} 
           camera={camera} 
           onUpdate={onUpdateCamera}
           onDelete={onDeleteCamera}
