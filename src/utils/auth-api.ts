@@ -2,7 +2,7 @@
 import axios from 'axios';
  
 
-const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL;
 
 export const loginUser = async (username: string, password: string) => {
   console.log('SERVER_URL:', SERVER_URL);
