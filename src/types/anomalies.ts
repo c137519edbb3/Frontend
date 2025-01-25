@@ -1,10 +1,12 @@
 interface Anomaly {
-    id: number;
+    anomalyId: number;
     title: string;
     description: string;
     cameras: string[];
-    criticality: "Moderate" | "Critical" | "Catastrophic";
-    scheduledTime: { start: string; end: string };
-    weekdays: string[];
-  }
-  
+    criticality: string;
+    startTime: string;
+    endTime: string;
+    modelName: string;
+    status: string;
+    daysOfWeek: string[];
+}

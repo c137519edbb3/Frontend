@@ -14,7 +14,7 @@ import { MultiSelect } from "../ui/multi-select";
 import { Button } from "../ui/button";
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "../ui/select";
 import { Checkbox } from "../ui/checkbox";
-
+ 
 interface AnomalyFormProps {
   cameraOptions: Array<{ label: string; value: string }>;
   onSave: (anomaly: Anomaly) => void;
@@ -56,6 +56,7 @@ const AnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, onSave }
       setOpen(false);
     };
   
+
   
     return (
         <Dialog open={open} onOpenChange={setOpen}>

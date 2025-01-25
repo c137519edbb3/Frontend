@@ -25,6 +25,7 @@ import SearchBox from "@/components/common/searchBox"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
 
+
 function Anomalies() {
   const [pageSize, setPageSize] = useState(10);
   const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
