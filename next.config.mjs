@@ -9,10 +9,7 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: true,
     },
-    // output: 'standalone',
-    server: {
-        port: 80
-    }
+    output: 'standalone',
 };
 
 export default nextConfig;
