@@ -117,6 +117,7 @@ interface UserProps {
   }
 
   const handleLogout = () => {
+    localStorage.removeItem("access_token");
     signOut({ callbackUrl: "/auth/login" });
   };
   

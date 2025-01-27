@@ -101,6 +101,7 @@ import { redirect } from 'next/navigation';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
+
 const chartData = [
   { date: "2024-04-01", High: 222, moderate: 150 },
   { date: "2024-04-02", High: 97, moderate: 180 },
@@ -565,13 +566,15 @@ const CameraDetailsGrid = () => {
 export default function Dashboard({ }) {
   
   const { data: session, status } = useSession();
+  const accessToken = session?.user?.token;
+  localStorage.setItem('access_token', accessToken);
 
   
   if (status === 'loading') {
     return <p>Loading...</p>;
   }
 
-  if (!session) {
+  if (!accessToken) {
     redirect('/auth/login'); 
   }
 

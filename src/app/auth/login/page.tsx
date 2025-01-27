@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { buttonVariants } from "@/components/ui/button"
 import { UserAuthForm } from "./components/user-auth-form"
 import { Suspense } from "react"
+import { useSession } from "next-auth/react"
 
 
 
