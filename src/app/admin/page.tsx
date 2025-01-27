@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -98,6 +98,9 @@ import Header from '@/components/common/navbar';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
+
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
+
 const chartData = [
   { date: "2024-04-01", High: 222, moderate: 150 },
   { date: "2024-04-02", High: 97, moderate: 180 },
@@ -336,11 +339,6 @@ function Component() {
   )
 }
 
-
-
-
-
-
 function DatePickerDemo() {
   const [date, setDate] = React.useState<Date>()
 
@@ -369,10 +367,6 @@ function DatePickerDemo() {
     </Popover>
   )
 }
-
-
-
-
 
 const anomalies = [
   {
@@ -431,8 +425,6 @@ const anomalies = [
   },
 ];
 
-
-
 function TableDemo() {
   return (
     <Table>
@@ -459,89 +451,111 @@ function TableDemo() {
   );
 }
 
-interface CameraDetails {
-  id: number;
-  name: string;
+interface Camera {
+  cameraId: number;
   location: string;
+  ipAddress: string;
+  cameraType: string;
+  organizationId: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 const CameraDetailsGrid = () => {
-  const [selectedCamera, setSelectedCamera] = React.useState<CameraDetails | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const { data: session } = useSession();
 
+  useEffect(() => {
+    const fetchCameras = async () => {
+      try {
+        const response = await fetch(`${SERVER_URL}/api/organization/1/cameras/online`, {
+          headers: {
+            'Authorization': `Bearer ${session?.user?.token}`
+          }
+        });
+        const data = await response.json();
+        setCameras(data.cameras);
+      } catch (error) {
+        console.error('Error fetching cameras:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-  const cameraDetails: CameraDetails[] = [
-    { id: 1, name: "Camera 1", location: "Entrance" },
-    { id: 2, name: "Camera 2", location: "Lobby" },
-    { id: 3, name: "Camera 3", location: "Parking Lot" },
-    { id: 4, name: "Camera 4", location: "Hallway" },
-    { id: 5, name: "Camera 5", location: "Conference Room" },
-    { id: 6, name: "Camera 6", location: "Kitchen" },
-    { id: 7, name: "Camera 7", location: "Warehouse" },
-    { id: 8, name: "Camera 8", location: "Exit" },
-    { id: 9, name: "Camera 9", location: "Reception" },
-    { id: 10, name: "Camera 10", location: "Staircase" },
-    { id: 11, name: "Camera 11", location: "Restroom" },
-    { id: 12, name: "Camera 12", location: "Garden" },
-    { id: 13, name: "Camera 13", location: "Backyard" },
-    { id: 14, name: "Camera 14", location: "Front Door" },
-    { id: 15, name: "Camera 15", location: "Sidewalk" },
-    { id: 16, name: "Camera 16", location: "Driveway" },
-  ];
+    if (session?.user?.token) {
+      fetchCameras();
+    }
+  }, [session]);
 
-  
-  const handleCameraClick = (camera: CameraDetails) => {
+  const handleCameraClick = (camera: Camera) => {
     setSelectedCamera(camera);
     setIsDialogOpen(true);
   };
+
+  if (isLoading) {
+    return <div>Loading cameras...</div>;
+  }
 
   return (
     <>
       <ScrollArea className="h-[420px] w-full">
         <div className="flex flex-col gap-4 pr-2">
-          {cameraDetails.map((camera) => (
+          {cameras.map((camera) => (
             <Card
-              key={camera.id}
+              key={camera.cameraId}
               className="bg-secondary text-neutral-400 hover:bg-accent hover:text-primary transition-all duration-300 ease-in-out cursor-pointer"
               onClick={() => handleCameraClick(camera)}
             >
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>{camera.name}</CardTitle>
+                    <CardTitle className="text-black">Camera {camera.cameraId}</CardTitle>
                     <p className="text-sm">{camera.location}</p>
                   </div>
                   <Camera className="h-5 w-5" />
                 </div>
               </CardHeader>
               <CardContent>
-                <p>Camera details will be shown here.</p>
+                <p>{camera.cameraType}</p>
               </CardContent>
             </Card>
           ))}
         </div>
       </ScrollArea>
+
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Camera className="h-5 w-5" />
-              {selectedCamera?.name}
+              Camera {selectedCamera?.cameraId}
             </DialogTitle>
             <DialogDescription>
               Location: {selectedCamera?.location}
+              <br />
+              Type: {selectedCamera?.cameraType}
+              <br />
+              Status: {selectedCamera?.status}
             </DialogDescription>
           </DialogHeader>
           
-          {/* Video Display Container */}
           <div className="mt-4 bg-black rounded-lg aspect-video w-full relative">
-            {/* Placeholder for video stream */}
-            <div className="absolute inset-0 flex items-center justify-center text-white">
-              <Camera className="h-12 w-12 opacity-50" />
-            </div>
-            {/* Your actual video component would go here */}
+            {selectedCamera?.ipAddress.includes('video') ? (
+              <img 
+                src={selectedCamera.ipAddress} 
+                alt="Camera Stream"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center text-white">
+                <p>Stream not available</p>
+              </div>
+            )}
           </div>
-
         </DialogContent>
       </Dialog>
     </>
@@ -598,9 +612,3 @@ export default function Dashboard({ }) {
     </div>
   );
 }
-
-
-
-
-
-
