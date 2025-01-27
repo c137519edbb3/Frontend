@@ -4,6 +4,7 @@ import AnomalyFormDialog from "@/components/admin/anomalyDialog"
 import Header from "@/components/common/navbar"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { useSession } from 'next-auth/react';
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
@@ -24,32 +25,28 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import SearchBox from "@/components/common/searchBox"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
+import { useEffect } from "react"
 
+const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
 function Anomalies() {
+  const { data: session } = useSession();
+  const accessToken = session?.accessToken;
   const [pageSize, setPageSize] = useState(10);
   const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
-  const [anomalies, setAnomalies] = useState<Anomaly[]>([
-    {
-      id: Date.now(),
-      title: "Students Cheating",
-      description: "Make sure that students dont cheat in exams",
-      cameras: ["Camera 1", "Camera 2"],
-      criticality: "Critical",
-      scheduledTime: { start: "08:00", end: "09:00" },
-      weekdays: ["Monday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    },
-    {
-      id: Date.now()+1000,
-      title: "Students Cheating",
-      description: "Make sure that students dont cheat in exams",
-      cameras: ["Camera 1", "Camera 2"],
-      criticality: "Critical",
-      scheduledTime: { start: "08:00", end: "09:00" },
-      weekdays: ["Monday", "Wednesday", "Thursday", "Friday", "Saturday"],
-    },
-    
-  ]);
+  const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+
+  // Fetch anomalies from the server: /api/organization/1/anomalies
+  useEffect(() => {
+    fetch(`${SERVER_URL}/api/organization/1/anomalies`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setAnomalies(data))
+      .catch((error) => console.error("Anomalies fetch error:", error));
+  }, [accessToken]);
 
   const handleDeleteClick = (anomalyId: number) => {
     setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
@@ -85,39 +82,31 @@ function Anomalies() {
       enableSorting: false,
     },
     {
-      accessorKey: "cameras",
-      header: "Assigned Cameras",
-      cell: ({ row }: any) => row.getValue("cameras").join(", "),
-      enableSorting: true,
-    },
-    {
       accessorKey: "criticality",
       header: "Criticality",
       cell: ({ row }: any) => row.getValue("criticality"),
       enableSorting: true,
     },
     {
-      accessorKey: "scheduledTime",
+      id: "scheduledTime",
       header: "Scheduled Time",
-      cell: ({ row }: any) => `${row.getValue("scheduledTime").start} - ${row.getValue("scheduledTime").end}`,
+      cell: ({ row }: { row: any }) => {
+        const startTime = row.original.startTime;
+        const endTime = row.original.endTime;
+        return `${startTime} - ${endTime}`;
+      },
       enableSorting: false,
-    },
-    {
-      accessorKey: "weekdays",
-      header: "Scheduled days",
-      cell: ({ row }: any) => row.getValue("weekdays").join(", "),
-      enableSorting: true,
-    },
+},
     {
       id: "actions",
       header: "Actions",
       cell: ({ row }: any) => (
         <div className="flex space-x-4">
-          <EditAnomalyFormDialog
+          {/* <EditAnomalyFormDialog
             cameraOptions={cameraOptions}
             initialAnomaly={row.original} 
             onSave={handleEditAnomaly}
-          />
+          /> */}
           <Trash
             className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-red-500"
             onClick={() => handleDeleteClick(row.original.id)}
@@ -151,10 +140,13 @@ function Anomalies() {
     },
   });
 
+
   const handleSaveAnomaly = (anomaly: any) => {
     console.log("Saved Anomaly:", anomaly);
     setAnomalies([...anomalies, anomaly]);
   };
+
+  
   
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
@@ -243,7 +235,7 @@ function Anomalies() {
             ) : (
               <TableRow>
                 <TableCell colSpan={columns.length} className="h-24 text-center">
-                  No results.
+                  No anomalies found
                 </TableCell>
               </TableRow>
             )}
