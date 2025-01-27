@@ -1,33 +1,35 @@
-# Base image for building
+# Build stage
 FROM node:18-alpine AS builder
 
-# Set working directory
 WORKDIR /app
 
-# Copy package.json and install dependencies
+# Copy package files
 COPY package*.json ./
+
+# Install dependencies
 RUN npm install --frozen-lockfile
 
-# Copy the application code
+# Copy source code
 COPY . .
 
-# Build the application
+# Build application
 RUN npm run build
 
-# Production image
-FROM node:18-alpine
+# Production stage
+FROM node:18-alpine AS runner
+
 WORKDIR /app
 
-# Copy only the built application and necessary files
-COPY --from=builder /app/.next /app/.next
-COPY --from=builder /app/package*.json /app/
-COPY --from=builder /app/public /app/public
+# Set node to production
+ENV NODE_ENV=production
 
-# Install only production dependencies
-RUN npm install --frozen-lockfile --production
+# Copy necessary files from builder
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
-# Expose the production port
-EXPOSE 3000
+# Expose port
+EXPOSE 80
 
-# Run the application
-CMD ["npm", "start"]
+# Start the application
+CMD ["node", "server.js"]
