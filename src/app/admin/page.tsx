@@ -472,7 +472,7 @@ const CameraDetailsGrid = () => {
   useEffect(() => {
     const fetchCameras = async () => {
       try {
-        const response = await fetch(`${SERVER_URL}/api/organization/1/cameras/online`, {
+        const response = await fetch(`${SERVER_URL}/api/organization/${session?.user?.organization?.id}/cameras/online`, {
           headers: {
             'Authorization': `Bearer ${session?.user?.token}`
           }
