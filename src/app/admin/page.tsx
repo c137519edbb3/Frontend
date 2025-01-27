@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ActivitySquare, Users, CreditCard, Activity, Shell } from "lucide-react";
+import { ActivitySquare, Users, CreditCard, Activity, Shell, Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -23,6 +23,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { User } from "lucide-react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 
 import {
   Table,
@@ -459,6 +466,10 @@ interface CameraDetails {
 }
 
 const CameraDetailsGrid = () => {
+  const [selectedCamera, setSelectedCamera] = React.useState<CameraDetails | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = React.useState(false);
+
+
   const cameraDetails: CameraDetails[] = [
     { id: 1, name: "Camera 1", location: "Entrance" },
     { id: 2, name: "Camera 2", location: "Lobby" },
@@ -478,25 +489,62 @@ const CameraDetailsGrid = () => {
     { id: 16, name: "Camera 16", location: "Driveway" },
   ];
 
+  
+  const handleCameraClick = (camera: CameraDetails) => {
+    setSelectedCamera(camera);
+    setIsDialogOpen(true);
+  };
+
   return (
-    <ScrollArea className="h-[420px] w-full"> {/* Fixed height */}
-      <div className="flex flex-col gap-4 pr-2"> {/* Add padding for scrollbar */}
-        {cameraDetails.map((camera) => (
-          <Card
-            key={camera.id}
-            className="bg-secondary text-neutral-400 hover:bg-accent hover:text-primary transition-all duration-300 ease-in-out"
-          >
-            <CardHeader>
-              <CardTitle>{camera.name}</CardTitle>
-              <p className="text-sm  ">{camera.location}</p>
-            </CardHeader>
-            <CardContent>
-              <p>Camera details will be shown here.</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </ScrollArea>
+    <>
+      <ScrollArea className="h-[420px] w-full">
+        <div className="flex flex-col gap-4 pr-2">
+          {cameraDetails.map((camera) => (
+            <Card
+              key={camera.id}
+              className="bg-secondary text-neutral-400 hover:bg-accent hover:text-primary transition-all duration-300 ease-in-out cursor-pointer"
+              onClick={() => handleCameraClick(camera)}
+            >
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>{camera.name}</CardTitle>
+                    <p className="text-sm">{camera.location}</p>
+                  </div>
+                  <Camera className="h-5 w-5" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <p>Camera details will be shown here.</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </ScrollArea>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Camera className="h-5 w-5" />
+              {selectedCamera?.name}
+            </DialogTitle>
+            <DialogDescription>
+              Location: {selectedCamera?.location}
+            </DialogDescription>
+          </DialogHeader>
+          
+          {/* Video Display Container */}
+          <div className="mt-4 bg-black rounded-lg aspect-video w-full relative">
+            {/* Placeholder for video stream */}
+            <div className="absolute inset-0 flex items-center justify-center text-white">
+              <Camera className="h-12 w-12 opacity-50" />
+            </div>
+            {/* Your actual video component would go here */}
+          </div>
+
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 
