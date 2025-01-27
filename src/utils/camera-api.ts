@@ -30,40 +30,60 @@ export const fetchCameras = async (organizationId: number, token: string) => {
 };
 
 export const updateCamera = async (
-    organizationId: number,
-    cameraId: number,
-    cameraData: Partial<Camera>,
-    token: string
-  ) => {
-    try {
-        console.log('cameraData:',cameraData);
-      const response = await axios.put(
-        `${SERVER_URL}/api/organization/${organizationId}/camera/${cameraId}`,
-        {
-            location: cameraData.location,
-            ipAddress: cameraData.ipAddress,
-            cameraType: cameraData.cameraType,
-        },{
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      console.log('response:'      ,response);
-      const updatedCamera: Camera = {
-        cameraId: response.data.camera.cameraId.toString(),
-        status: response.data.camera.status,
-        ipAddress: response.data.camera.ipAddress,
-        location: response.data.camera.location,
-        cameraType: response.data.camera.cameraType,
-      };
-  
-      return updatedCamera;
-    } catch (error) {
-      console.error("Error updating camera:", error);
-      throw error;
+  organizationId: number,
+  cameraId: number,
+  cameraData: Partial<Camera>,
+  token: string
+) => {
+  if (!organizationId || !cameraId || !token) {
+    throw new Error('Missing required parameters');
+  }
+
+  try {
+    const payload = {
+      location: cameraData.location?.trim(),
+      ipAddress: cameraData.ipAddress?.trim(),
+      cameraType: cameraData.cameraType?.trim(),
+    };
+
+    const response = await axios.put(
+      `${SERVER_URL}/api/organization/${organizationId}/camera/${cameraId}`,
+      payload,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+
+    console.log(response)
+
+    if (!response.data || !response.data.camera) {
+      throw new Error('Invalid response from server');
     }
-  };
+
+    return {
+      cameraId: response.data.camera.cameraId.toString(),
+      status: response.data.camera.status || 'offline',
+      ipAddress: response.data.camera.ipAddress,
+      location: response.data.camera.location,
+      cameraType: response.data.camera.cameraType,
+    };
+
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      console.error('Axios Error:', {
+        status: error.response?.status,
+        message: error.response?.data?.message || error.message,
+        data: error.response?.data
+      });
+      throw new Error(`Failed to update camera: ${error.response?.data?.message || error.message}`);
+    }
+    console.error('Update camera error:', error);
+    throw new Error('Failed to update camera');
+  }
+};
 
 
 export const deleteCamera = async (

@@ -126,6 +126,7 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
 
 
   const handleUpdateCamera = async (cameraId: string, updatedData: Partial<Camera>) => {
+    console.log(cameraId, updatedData)
     if (!session) {
       console.error("User is not authenticated");
       return;
@@ -163,7 +164,6 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
   };
 
   const handleDeleteCamera = async (cameraId: string) => {
-  
     if (!session) {
       console.error("User is not authenticated");
       return;

@@ -6,6 +6,12 @@ services:
     restart: always
     ports:
       - "80:80"
+    env_file:
+      - .env
     environment:
       - NODE_ENV=production
       - PORT=80
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
