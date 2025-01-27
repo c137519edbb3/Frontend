@@ -1,4 +1,4 @@
-export interface ApiAnomaly {
+export interface Anomaly {
     daysOfWeek: string[];
     anomalyId: number;
     title: string;

@@ -26,19 +26,24 @@ import SearchBox from "@/components/common/searchBox"
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable"
 import { Separator } from "@/components/ui/separator"
 import { useEffect } from "react"
+import { Anomaly } from "@/types/anomalies"
+import { Camera } from "@/types/camera"
+import { AnomalyRequest } from "@/types/anomaly-request"
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
 function Anomalies() {
   const { data: session } = useSession();
   const accessToken = session?.accessToken;
+  const organizationId = session?.user.organization.id;
   const [pageSize, setPageSize] = useState(10);
   const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
+  const [cameras, setCameras] = useState<Camera[]>([]);
 
-  // Fetch anomalies from the server: /api/organization/1/anomalies
+  // Fetch anomalies from the server: /api/organization/<organizationId>/anomalies
   useEffect(() => {
-    fetch(`${SERVER_URL}/api/organization/1/anomalies`, {
+    fetch(`${SERVER_URL}/api/organization/${organizationId}/anomalies`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -48,16 +53,28 @@ function Anomalies() {
       .catch((error) => console.error("Anomalies fetch error:", error));
   }, [accessToken]);
 
+
+  // Fetch cameras from the server: /api/organization/<organizationId>/organizationId>/cameras
+  useEffect(() => {
+    fetch(`${SERVER_URL}/api/organization/${organizationId}/cameras`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setCameras(data.cameras))
+      .catch((error) => console.error("Cameras fetch error:", error));
+  }, [accessToken]);
+
   const handleDeleteClick = (anomalyId: number) => {
-    setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
+    // setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
+    console.log(cameras);
   };
 
-  const cameraOptions = [
-    "Camera 1",
-    "Camera 2",
-    "Camera 3",
-    "Camera 4",
-  ].map((camera) => ({ label: camera, value: camera }));
+  const cameraOptions = Array.isArray(cameras) ? cameras.map((camera) => ({ 
+    label: `${camera.location} (${camera.cameraType})`, 
+    value: camera.cameraId.toString() 
+  })) : [];
 
   const handleEditAnomaly = (updatedAnomaly: Anomaly) => {
     setAnomalies(anomalies.map(anomaly => 
@@ -141,9 +158,39 @@ function Anomalies() {
   });
 
 
-  const handleSaveAnomaly = (anomaly: any) => {
-    console.log("Saved Anomaly:", anomaly);
-    setAnomalies([...anomalies, anomaly]);
+  const handleSaveAnomaly = async (anomaly: AnomalyRequest) => {
+    try {
+      const response = await fetch(
+        `${SERVER_URL}/api/organization/${organizationId}/anomaly`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({
+            title: anomaly.title,
+            description: anomaly.description,
+            criticality: anomaly.criticality,
+            modelName: anomaly.modelName,
+            cameraIds: anomaly.cameraIds.map(Number),
+            startTime: anomaly.startTime,
+            endTime: anomaly.endTime,
+            daysOfWeek: anomaly.daysOfWeek
+          }),
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error('Failed to create anomaly');
+      }
+  
+      const newAnomaly = await response.json();
+      setAnomalies([...anomalies, newAnomaly]);
+    } catch (error) {
+      console.error('Error creating anomaly:', error);
+      // Add error handling/notification here
+    }
   };
 
   
