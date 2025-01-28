@@ -40,35 +40,71 @@ function Anomalies() {
   const [editingAnomaly, setEditingAnomaly] = useState<Anomaly | null>(null);
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [cameras, setCameras] = useState<Camera[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Fetch anomalies from the server: /api/organization/<organizationId>/anomalies
   useEffect(() => {
+    if (!organizationId || !accessToken) return;
+
     fetch(`${SERVER_URL}/api/organization/${organizationId}/anomalies`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     })
       .then((response) => response.json())
-      .then((data) => setAnomalies(data))
-      .catch((error) => console.error("Anomalies fetch error:", error));
-  }, [accessToken]);
+      .then((data) => {
+        setAnomalies(data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Anomalies fetch error:", error);
+        setLoading(false);
+      });
+  }, [accessToken, organizationId]);
 
 
   // Fetch cameras from the server: /api/organization/<organizationId>/organizationId>/cameras
   useEffect(() => {
+    if (!organizationId || !accessToken) return;
+
     fetch(`${SERVER_URL}/api/organization/${organizationId}/cameras`, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     })
       .then((response) => response.json())
-      .then((data) => setCameras(data.cameras))
-      .catch((error) => console.error("Cameras fetch error:", error));
-  }, [accessToken]);
+      .then((data) => {
+        setCameras(data.cameras);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Cameras fetch error:", error);
+        setLoading(false);
+      });
+  }, [accessToken, organizationId]);
 
-  const handleDeleteClick = (anomalyId: number) => {
-    // setAnomalies(anomalies.filter((anomaly) => anomaly.id !== anomalyId));
-    console.log(cameras);
+  const handleDeleteClick = async (anomalyId: number) => {
+    try {
+      const response = await fetch(
+        `${SERVER_URL}/api/organization/${organizationId}/anomaly/${anomalyId}`,
+        {
+          method: 'DELETE',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete anomaly');
+      }
+
+      // Remove the deleted anomaly from state
+      setAnomalies(anomalies.filter((anomaly) => anomaly.anomalyId !== anomalyId));
+    } catch (error) {
+      console.error('Error deleting anomaly:', error);
+      // Add error handling/notification here
+    }
   };
 
   const cameraOptions = Array.isArray(cameras) ? cameras.map((camera) => ({ 
@@ -126,7 +162,7 @@ function Anomalies() {
           /> */}
           <Trash
             className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-red-500"
-            onClick={() => handleDeleteClick(row.original.id)}
+            onClick={() => handleDeleteClick(row.original.anomalyId)}
           />
         </div>
       ),
@@ -193,6 +229,9 @@ function Anomalies() {
     }
   };
 
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   
   
   return (
