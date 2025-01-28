@@ -29,6 +29,8 @@ import { useEffect } from "react"
 import { Anomaly } from "@/types/anomalies"
 import { Camera } from "@/types/camera"
 import { AnomalyRequest } from "@/types/anomaly-request"
+import Loading from "@/components/common/Loading"
+import { createAnomaly, deleteAnomaly, getAnomalies, getCameras } from "@/utils/anomaly-api"
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
@@ -45,19 +47,14 @@ function Anomalies() {
   // Fetch anomalies from the server: /api/organization/<organizationId>/anomalies
   useEffect(() => {
     if (!organizationId || !accessToken) return;
-
-    fetch(`${SERVER_URL}/api/organization/${organizationId}/anomalies`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
+  
+    getAnomalies(organizationId, accessToken)
       .then((data) => {
         setAnomalies(data);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Anomalies fetch error:", error);
+        console.error("Failed to fetch anomalies:", error);
         setLoading(false);
       });
   }, [accessToken, organizationId]);
@@ -66,44 +63,24 @@ function Anomalies() {
   // Fetch cameras from the server: /api/organization/<organizationId>/organizationId>/cameras
   useEffect(() => {
     if (!organizationId || !accessToken) return;
-
-    fetch(`${SERVER_URL}/api/organization/${organizationId}/cameras`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        setCameras(data.cameras);
+  
+    getCameras(organizationId, accessToken)
+      .then((cameras) => {
+        setCameras(cameras);
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Cameras fetch error:", error);
+        console.error("Failed to fetch cameras:", error);
         setLoading(false);
       });
   }, [accessToken, organizationId]);
 
   const handleDeleteClick = async (anomalyId: number) => {
     try {
-      const response = await fetch(
-        `${SERVER_URL}/api/organization/${organizationId}/anomaly/${anomalyId}`,
-        {
-          method: 'DELETE',
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error('Failed to delete anomaly');
-      }
-
-      // Remove the deleted anomaly from state
+      await deleteAnomaly(organizationId, anomalyId, accessToken);
       setAnomalies(anomalies.filter((anomaly) => anomaly.anomalyId !== anomalyId));
     } catch (error) {
       console.error('Error deleting anomaly:', error);
-      // Add error handling/notification here
     }
   };
 
@@ -196,41 +173,15 @@ function Anomalies() {
 
   const handleSaveAnomaly = async (anomaly: AnomalyRequest) => {
     try {
-      const response = await fetch(
-        `${SERVER_URL}/api/organization/${organizationId}/anomaly`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${accessToken}`,
-          },
-          body: JSON.stringify({
-            title: anomaly.title,
-            description: anomaly.description,
-            criticality: anomaly.criticality,
-            modelName: anomaly.modelName,
-            cameraIds: anomaly.cameraIds.map(Number),
-            startTime: anomaly.startTime,
-            endTime: anomaly.endTime,
-            daysOfWeek: anomaly.daysOfWeek
-          }),
-        }
-      );
-  
-      if (!response.ok) {
-        throw new Error('Failed to create anomaly');
-      }
-  
-      const newAnomaly = await response.json();
+      const newAnomaly = await createAnomaly(organizationId, anomaly, accessToken);
       setAnomalies([...anomalies, newAnomaly]);
     } catch (error) {
       console.error('Error creating anomaly:', error);
-      // Add error handling/notification here
     }
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
   
   
