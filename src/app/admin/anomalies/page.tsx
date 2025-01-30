@@ -89,14 +89,11 @@ function Anomalies() {
     value: camera.cameraId.toString() 
   })) : [];
 
-  const handleEditAnomaly = (updatedAnomaly: Anomaly) => {
+  const handleUpdateAnomaly = (updatedAnomaly: Anomaly) => {
     setAnomalies(anomalies.map(anomaly => 
-      anomaly.id === updatedAnomaly.id ? updatedAnomaly : anomaly
+      anomaly.anomalyId === updatedAnomaly.anomalyId ? updatedAnomaly : anomaly
     ));
-    setEditingAnomaly(null);
   };
-
- 
   
   const columns = [
     {
@@ -132,11 +129,13 @@ function Anomalies() {
       header: "Actions",
       cell: ({ row }: any) => (
         <div className="flex space-x-4">
-          {/* <EditAnomalyFormDialog
+          <EditAnomalyFormDialog
             cameraOptions={cameraOptions}
-            initialAnomaly={row.original} 
-            onSave={handleEditAnomaly}
-          /> */}
+            initialAnomaly={row.original}
+            organizationId={organizationId}
+            accessToken={accessToken}
+            onSave={handleUpdateAnomaly}
+          />
           <Trash
             className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-red-500"
             onClick={() => handleDeleteClick(row.original.anomalyId)}

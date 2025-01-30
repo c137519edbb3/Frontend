@@ -12,17 +12,35 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { MultiSelect } from "../ui/multi-select";
 import { Button } from "../ui/button";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectGroup, SelectItem } from "../ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "../ui/select";
 import { Edit } from "lucide-react";
 import { Checkbox } from "../ui/checkbox";
+import { dayCodeMap } from "@/constants/config";
+import { AnomalyRequest } from "@/types/anomaly-request";
+import { updateAnomaly } from "@/utils/anomaly-api";
 
 interface AnomalyFormProps {
   cameraOptions: Array<{ label: string; value: string }>;
   initialAnomaly?: Anomaly | null;
-  onSave: (anomaly: Anomaly) => void;
+  organizationId: number;
+  accessToken: string;
+  onSave: (updatedAnomaly: Anomaly) => void;
 }
 
-const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, initialAnomaly, onSave }) => {
+const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({
+  cameraOptions,
+  initialAnomaly,
+  organizationId,
+  accessToken,
+  onSave,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [anomaly, setAnomaly] = useState<Anomaly>({
     id: Date.now(),
@@ -34,9 +52,11 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, init
     weekdays: [],
   });
   useEffect(() => {
-    console.log("Props passed to EditAnomalyFormDialog:", { cameraOptions, initialAnomaly, onSave });
-  }, [cameraOptions, initialAnomaly, onSave]);
-  
+    console.log("Props passed to EditAnomalyFormDialog:", {
+      cameraOptions,
+      initialAnomaly,
+    });
+  }, [cameraOptions, initialAnomaly]);
 
   useEffect(() => {
     if (initialAnomaly) {
@@ -44,42 +64,68 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, init
     }
   }, [initialAnomaly]);
 
-  const handleSave = () => {
-    onSave({
-      ...anomaly,
-      cameras: Array.isArray(anomaly.cameras) ? anomaly.cameras : [],
-      weekdays: Array.isArray(anomaly.weekdays) ? anomaly.weekdays : [],
-    });
-    setIsOpen(false);
+  const handleSave = async () => {
+    try {
+      const anomalyRequest: AnomalyRequest = {
+        title: anomaly.title,
+        description: anomaly.description,
+        criticality: anomaly.criticality,
+        modelName: anomaly.modelName,
+        cameraIds: anomaly.Cameras.map((camera: { cameraId: int }) => camera.cameraId),
+        // startTime: anomaly.startTime,
+        // endTime: anomaly.endTime,
+        // daysOfWeek: anomaly.daysOfWeek
+      };
+
+      const updatedAnomaly = await updateAnomaly(
+        organizationId,
+        anomaly.anomalyId,
+        anomalyRequest,
+        accessToken
+      );
+
+      onSave(updatedAnomaly);
+      setIsOpen(false);
+    } catch (error) {
+      console.error('Error updating anomaly:', error);
+      // Add error notification here
+    }
   };
 
   const handleChange = (field: keyof Anomaly, value: any) => {
-    setAnomaly((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    if (field === 'daysOfWeek') {
+      setAnomaly((prev) => ({
+        ...prev,
+        daysOfWeek: Array.isArray(value) ? value : prev.daysOfWeek
+      }));
+    } else {
+      setAnomaly((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
   };
 
   const handleOpenChange = (state: boolean) => {
     console.log("Dialog state:", state);
     setIsOpen(state);
   };
-  
-  
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {/* <Button variant="ghost" onClick={() => setIsOpen(true)}>Edit</Button> */}
         <Edit
-            className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary"
-            onClick={() => setIsOpen(true)}
-          />
+          className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-primary"
+          onClick={() => setIsOpen(true)}
+        />
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Edit Anomaly</DialogTitle>
-          <DialogDescription>Update the details of the anomaly.</DialogDescription>
+          <DialogDescription>
+            Update the details of the anomaly.
+          </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid grid-cols-4 items-center gap-4">
@@ -123,7 +169,6 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, init
             />
           </div>
 
-
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="anomaly-start-time" className="text-right">
               Start time
@@ -131,83 +176,98 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({ cameraOptions, init
             <Input
               id="anomaly-start-time"
               type="time"
-              value={anomaly.scheduledTime.start}
+              value={anomaly.startTime}
               onChange={(e) =>
-                handleChange("scheduledTime", { ...anomaly.scheduledTime, start: e.target.value })
+                handleChange("scheduledTime", {
+                  ...anomaly.scheduledTime,
+                  start: e.target.value,
+                })
               }
             />
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="end time" className="text-right">
-                  End time
+              End time
             </Label>
             <Input
               id="anomaly-end-time"
               type="time"
-              value={anomaly.scheduledTime.end}
+              value={anomaly.endTime}
               onChange={(e) =>
-                handleChange("scheduledTime", { ...anomaly.scheduledTime, end: e.target.value })
+                handleChange("scheduledTime", {
+                  ...anomaly.scheduledTime,
+                  end: e.target.value,
+                })
               }
             />
           </div>
 
-
           <div className="grid grid-cols-4 items-center gap-4">
-          <Label htmlFor="anomaly-criticality" className="text-right">
-            Criticality
-          </Label>
-          <Select
-            value={anomaly.criticality}
-            onValueChange={(value) => handleChange("criticality", value)}
-          >
-            <SelectTrigger id="anomaly-criticality" className="col-span-3">
-              <SelectValue placeholder="Select criticality" />
-            </SelectTrigger>
-            <SelectContent className="col-span-3">
-              <SelectGroup>
-                {["Low", "Moderate", "Critical"].map((level) => (
-                  <SelectItem key={level} value={level}>
-                    {level}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select> 
+            <Label htmlFor="anomaly-criticality" className="text-right">
+              Criticality
+            </Label>
+            <Select
+              value={anomaly.criticality}
+              onValueChange={(value) => handleChange("criticality", value)}
+            >
+              <SelectTrigger id="anomaly-criticality" className="col-span-3">
+                <SelectValue placeholder="Select criticality" />
+              </SelectTrigger>
+              <SelectContent className="col-span-3">
+                <SelectGroup>
+                  {["Low", "Moderate", "Critical"].map((level) => (
+                    <SelectItem key={level} value={level}>
+                      {level}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </div>
 
-          
-
-          
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="anomaly-weekdays" className="text-right">
               Runs on Days
             </Label>
             <div className="mt-4">
-                  <div className="grid grid-cols-2 gap-x-32 gap-y-2">
-                    {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
-                      <div key={day} className="flex items-center">
-                        <Checkbox
-                          className="mr-2"
-                          id={day.toLowerCase()}
-                          checked={anomaly.weekdays.includes(day)}
-                          onCheckedChange={(isChecked) => {
-                            const updatedWeekdays = isChecked
-                              ? [...anomaly.weekdays, day]
-                              : anomaly.weekdays.filter((d) => d !== day);
-                            handleChange("weekdays", updatedWeekdays);
-                          }}
-                        />
-
-                        <label htmlFor={day.toLowerCase()} className="text-sm text-gray-700">
-                          {day}
-                        </label>
-                      </div>
-                    ))}
+              <div className="grid grid-cols-2 gap-x-32 gap-y-2">
+                {[
+                  "Monday",
+                  "Tuesday",
+                  "Wednesday",
+                  "Thursday",
+                  "Friday",
+                  "Saturday",
+                  "Sunday",
+                ].map((day) => (
+                  <div key={day} className="flex items-center">
+                    <Checkbox
+                      className="mr-2"
+                      id={day.toLowerCase()}
+                      checked={anomaly.daysOfWeek?.includes(dayCodeMap[day])}
+                      onCheckedChange={(isChecked) => {
+                        const dayCode = dayCodeMap[day];
+                        const updatedWeekdays = isChecked
+                          ? [...(anomaly.daysOfWeek || []), dayCode]
+                          : (anomaly.daysOfWeek || []).filter(
+                              (d) => d !== dayCode
+                            );
+                        handleChange("daysOfWeek", updatedWeekdays);
+                      }}
+                    />
+                    <label
+                      htmlFor={day.toLowerCase()}
+                      className="text-sm text-gray-700"
+                    >
+                      {day}
+                    </label>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
+          </div>
+        </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setIsOpen(false)}>
             Cancel

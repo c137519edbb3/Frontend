@@ -117,3 +117,34 @@ export const createAnomaly = async (
     throw error;
   }
 };
+
+export const updateAnomaly = async (
+  organizationId: number,
+  anomalyId: number,
+  anomaly: AnomalyRequest,
+  accessToken: string
+) => {
+  try {
+    console.log("Updating anomaly:", JSON.stringify(anomaly));
+    const response = await fetch(
+      `${SERVER_URL}/api/organization/${organizationId}/anomaly/${anomalyId}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify(anomaly),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to update anomaly');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error updating anomaly:', error);
+    throw error;
+  }
+};

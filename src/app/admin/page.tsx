@@ -567,7 +567,6 @@ export default function Dashboard({ }) {
   
   const { data: session, status } = useSession();
   const accessToken = session?.user?.token;
-  localStorage.setItem('access_token', accessToken);
 
   
   if (status === 'loading') {

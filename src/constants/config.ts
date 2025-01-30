@@ -86,3 +86,13 @@ export const userNavbar = [
     icon: "settings",
   },
 ];
+
+export const dayCodeMap: Record<string, string> = {
+  'Monday': 'MON',
+  'Tuesday': 'TUE',
+  'Wednesday': 'WED',
+  'Thursday': 'THU',
+  'Friday': 'FRI',
+  'Saturday': 'SAT',
+  'Sunday': 'SUN'
+};
