@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { UserAuthForm } from "./components/user-auth-form"
 import { Suspense } from "react"
 import { useSession } from "next-auth/react"
+import Loading from "@/components/common/Loading"
 
 
 
@@ -75,7 +76,7 @@ export default function AuthenticationPage() {
                 Enter your email below to login to your account
               </p>
             </div>
-            <Suspense fallback={<div>Loading...</div>}>
+            <Suspense fallback={<Loading />}>
               <UserAuthForm />
             </Suspense>
             <p className="px-8 text-center text-sm text-muted-foreground">

@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Loader } from "lucide-react"
 import { IconBrandGoogle } from "@tabler/icons-react"
-import { useAuth } from "@/context/authContext"
 import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { loginUser } from "@/utils/auth-api"
+import { useAuth } from "@/context/authContext"
  
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -21,7 +21,8 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [credentials, setCredentials] = useState({ username: "", password: "" })
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useAuth();
   
 
   async function onSubmit(event: React.SyntheticEvent) {
@@ -30,13 +31,19 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
 
     try {
+      const response = await loginUser(credentials.username, credentials.password);
+
+      if (response.token){
+        login(response.token);
+      }
+
       const result = await signIn('credentials', {
         redirect: false,
         username: credentials.username,
         password: credentials.password,
         callbackUrl: '/admin',
-      })
-      // console.log(result);
+      });
+
       if (result?.error) {
         console.log("signIn error:", result.error);
         setError(result.error)

@@ -2,10 +2,12 @@
 
 import { createContext, useState, useEffect, useContext, ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import Loading from "@/components/common/Loading";
 
 // Define the context value type
 interface AuthContextType {
   isAuthenticated: boolean;
+  isLoading: boolean;  // Add loading state
   login: (token: string) => void;
   logout: () => void;
 }
@@ -19,25 +21,32 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true); // Add loading state
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      setIsAuthenticated(true);
-    } else {
-      setIsAuthenticated(false);
-      if (pathname !== "/auth/login") {
-        router.push("/auth/login");
+    const checkAuth = async () => {
+      const token = localStorage.getItem("access_token");
+      console.log("Token:", token);
+      if (token) {
+        setIsAuthenticated(true);
+      } else {
+        setIsAuthenticated(false);
+        if (pathname !== "/auth/login") {
+          router.push("/auth/login");
+        }
       }
-    }
-  }, [router]);
+      setIsLoading(false);
+    };
+
+    checkAuth();
+  }, [router, pathname]); // Add pathname dependency
 
   const login = (token: string) => {
     localStorage.setItem("access_token", token);
     setIsAuthenticated(true);
-    router.push("/"); // Redirect after login
+    router.push("/admin");
   };
 
   const logout = () => {
@@ -46,8 +55,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     router.push("/auth/login");
   };
 
+  if (isLoading) {
+    return <Loading />;
+  }
+
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
