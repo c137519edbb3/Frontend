@@ -10,6 +10,9 @@ const nextConfig = {
         ignoreBuildErrors: true,
     },
     output: 'standalone',
+    experimental: {
+        outputStandalone: true,
+    }
 };
 
 export default nextConfig;

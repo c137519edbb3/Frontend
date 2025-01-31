@@ -1,22 +1,32 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
+# Copy package files and install dependencies
 COPY package*.json ./
-COPY .env* ./
+RUN npm ci
 
-# Install dependencies
-RUN npm install
-
-# Copy source code
+# Copy source files
 COPY . .
 
-# Build application
+# Build the application
 RUN npm run build
 
-# Expose port
+# Production image
+FROM node:18-alpine AS runner
+
+WORKDIR /app
+
+# Copy built assets from builder
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=80
+
 EXPOSE 80
 
 # Start the application
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
