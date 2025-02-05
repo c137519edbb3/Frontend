@@ -505,7 +505,7 @@ const CameraDetailsGrid = () => {
     <>
       <ScrollArea className="h-[420px] w-full">
         <div className="flex flex-col gap-4 pr-2">
-          {cameras.map((camera) => (
+          {Array.isArray(cameras) && cameras.length > 0 ? cameras.map((camera) => (
             <Card
               key={camera.cameraId}
               className="bg-secondary text-neutral-400 hover:bg-accent hover:text-primary transition-all duration-300 ease-in-out cursor-pointer"
@@ -524,7 +524,7 @@ const CameraDetailsGrid = () => {
                 <p>{camera.cameraType}</p>
               </CardContent>
             </Card>
-          ))}
+          )): (<p>No cameras available</p>)}
         </div>
       </ScrollArea>
 
