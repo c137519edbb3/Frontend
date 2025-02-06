@@ -14,6 +14,7 @@ import { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Textarea } from "../ui/textarea";
 
 
 
@@ -67,17 +68,21 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
     location: "",
     cameraType: "",
     ipAddress: "",
+    cameraDescription: ""
   });
   const [formError, setFormError] = useState("");
 
   // Handle input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: value,
     }));
   };
+  
 
   // Handle form submission
   const handleSaveCamera = async () => {
@@ -98,13 +103,13 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
     }
 
     const organizationId = user.organization.id;
-
     const newCameraData: Camera = {
       cameraId: String(cameras.length + 1),
       location: formData.location,
       cameraType: formData.cameraType,
       ipAddress: formData.ipAddress,
       status: "ONLINE",
+      cameraDescription: formData.cameraDescription
     };
 
     try {
@@ -119,14 +124,13 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
     }
     // Reset form and close dialog
     setOpenDialog(false);
-    setFormData({ name: "", location: "", cameraType: "", ipAddress: "" });
+    setFormData({ name: "", location: "", cameraType: "", ipAddress: "", cameraDescription: "" });
     setFormError("");
   };
 
 
 
   const handleUpdateCamera = async (cameraId: string, updatedData: Partial<Camera>) => {
-    console.log(cameraId, updatedData)
     if (!session) {
       console.error("User is not authenticated");
       return;
@@ -237,6 +241,16 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
                       onChange={handleInputChange}
                       className="col-span-3"
                       required
+                    />
+                  </div>
+                  <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="description" className="text-right pt-2">Description</Label>
+                    <Textarea
+                      id="description"
+                      name="cameraDescription"
+                      value={formData.cameraDescription}
+                      onChange={handleInputChange}
+                      className="col-span-3 min-h-[120px]"
                     />
                   </div>
                   <div className="grid grid-cols-4 items-center gap-4">

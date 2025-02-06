@@ -20,6 +20,7 @@ export const fetchCameras = async (organizationId: number, token: string) => {
         ipAddress: camera.ipAddress,
         location: camera.location,
         cameraType: camera.cameraType,
+        cameraDescription: camera.cameraDescription,
       }));
   
     return cameras;
@@ -44,6 +45,7 @@ export const updateCamera = async (
       location: cameraData.location?.trim(),
       ipAddress: cameraData.ipAddress?.trim(),
       cameraType: cameraData.cameraType?.trim(),
+      cameraDescription: cameraData.cameraDescription?.trim(),
     };
 
     const response = await axios.put(
@@ -69,6 +71,7 @@ export const updateCamera = async (
       ipAddress: response.data.camera.ipAddress,
       location: response.data.camera.location,
       cameraType: response.data.camera.cameraType,
+      cameraDescription: response.data.camera.cameraDescription,
     };
 
   } catch (error) {
@@ -129,6 +132,7 @@ export const addCamera = async (
             location: cameraData.location,
             ipAddress: cameraData.ipAddress,
             cameraType: cameraData.cameraType,
+            cameraDescription: cameraData.cameraDescription,
         }, {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -142,6 +146,7 @@ export const addCamera = async (
         location: response.data.camera.location,
         cameraType: response.data.camera.cameraType,
         status: response.data.camera.status,
+        cameraDescription: response.data.camera.cameraDescription,
       };
   
       return newCamera;

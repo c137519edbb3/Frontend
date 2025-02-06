@@ -10,6 +10,7 @@ import { useState } from 'react';
 import { Sheet, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { Textarea } from '../ui/textarea';
 
 interface CameraCardProps {
     camera: Camera;
@@ -24,6 +25,7 @@ interface CameraCardProps {
       location: camera.location,
       cameraType: camera.cameraType,
       ipAddress: camera.ipAddress,
+      cameraDescription: camera.cameraDescription
     });
     const [isSheetOpen, setIsSheetOpen] = useState(false);
   
@@ -93,6 +95,16 @@ interface CameraCardProps {
                     className="col-span-3"
                   />
                 </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                    <Label htmlFor="description" className="text-right pt-2">Description</Label>
+                    <Textarea
+                      id="description"
+                      name="cameraDescription"
+                      value={editFormData.cameraDescription}
+                      onChange={handleInputChange}
+                      className="col-span-3 min-h-[120px]"
+                    />
+                  </div>
                 <div className="grid grid-cols-4 items-center gap-4">
                   <Label htmlFor="cameraType" className="text-right">Model</Label>
                   <Input

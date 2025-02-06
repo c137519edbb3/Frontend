@@ -4,4 +4,5 @@ export interface Camera {
     ipAddress: string;
     location: string;
     cameraType: string;
+    cameraDescription?: string;
   }  
