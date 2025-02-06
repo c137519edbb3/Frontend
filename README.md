@@ -20,6 +20,45 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+
+## Setup (With Docker)
+
+Make sure you have Docker already installed in your machine. If not, download it from [Download Docker](https://www.docker.com/products/docker-desktop/). You can verify if Docker is installed by running the following command in your terminal:
+
+```bash
+docker -v
+```
+
+Clone the repository and navigate to the project directory:
+
+```bash
+git clone https://github.com/c137519edbb3/Frontend.git
+```
+
+Navigate to the project directory:
+
+```bash
+cd Frontend
+```
+
+Create a `.env` file in the root directory of the project and add the following environment variables:
+
+```bash
+NEXT_PUBLIC_SERVER_URL_AWS=
+NEXTAUTH_SECRET=
+NEXTAUTH_URL=
+```
+
+Get these values from the project owner.
+
+Build the Docker image:
+
+```bash
+docker compose up --build
+```
+
+Wait for the build to complete and navigate to [http://localhost](http://localhost) in your browser to see the result.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
