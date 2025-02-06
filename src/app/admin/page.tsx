@@ -98,6 +98,7 @@ import Header from '@/components/common/navbar';
 import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
+import Loading from '@/components/common/Loading';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
@@ -473,6 +474,10 @@ const CameraDetailsGrid = () => {
   useEffect(() => {
     const fetchCameras = async () => {
       try {
+        if (!session?.user?.organization?.id || !session?.user?.token) {
+          return;
+        }
+        
         const response = await fetch(`${SERVER_URL}/api/organization/${session?.user?.organization?.id}/cameras/online`, {
           headers: {
             'Authorization': `Bearer ${session?.user?.token}`
@@ -563,21 +568,53 @@ const CameraDetailsGrid = () => {
   );
 };
 
-export default function Dashboard({ }) {
-  
+export default function Dashboard() {
+  // 1. All hooks at top level
   const { data: session, status } = useSession();
-  const accessToken = session?.user?.token;
+  const [loading, setLoading] = useState(true);
+  const [cameras, setCameras] = useState([]);
+  const [error, setError] = useState(null);
 
-  
-  if (status === 'loading') {
-    return <p>Loading...</p>;
+  // 2. Single useEffect with proper dependencies
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!session?.user?.organization?.id || !session?.user?.token) {
+        return;
+      }
+
+      try {
+        const response = await fetch(
+          `${SERVER_URL}/api/organization/${session.user.organization.id}/cameras/online`,
+          {
+            headers: {
+              'Authorization': `Bearer ${session.user.token}`
+            }
+          }
+        );
+        const data = await response.json();
+        setCameras(data.cameras);
+      } catch (err) {
+        setError(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [session]);
+
+  // 3. Early return for loading state
+  if (loading) {
+    return <Loading />;
   }
 
-  if (!accessToken) {
-    redirect('/auth/login'); 
+  // 4. Check authentication
+  if (!session?.user) {
+    router.push('/auth/login');
+    return null; // Ensure no further rendering
   }
 
-  
+  // 5. Render dashboard
   return (
     <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
       <Header pageName="Dashboard" userName="John Doe" userEmail="6oFkI@example.com" />
