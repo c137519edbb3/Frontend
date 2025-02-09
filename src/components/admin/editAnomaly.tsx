@@ -71,11 +71,13 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({
         description: anomaly.description,
         criticality: anomaly.criticality,
         modelName: anomaly.modelName,
-        cameraIds: anomaly.Cameras.map((camera: { cameraId: int }) => camera.cameraId),
+        cameraIds: anomaly.cameras.map(id => parseInt(id))
         // startTime: anomaly.startTime,
         // endTime: anomaly.endTime,
         // daysOfWeek: anomaly.daysOfWeek
       };
+      console.log(anomaly.cameras)
+      console.log(anomalyRequest)
 
       const updatedAnomaly = await updateAnomaly(
         organizationId,
