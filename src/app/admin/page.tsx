@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { formatTimestamp } from '@/utils/date-utils';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ActivitySquare, Users, CreditCard, Activity, Shell, Camera } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -99,6 +100,8 @@ import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
 import { redirect } from 'next/navigation';
 import Loading from '@/components/common/Loading';
+import { AnomalyLog, subscribeToAnomalyLogs } from '@/services/firebaseService';
+import { Timestamp } from 'firebase/firestore';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
@@ -370,64 +373,26 @@ function DatePickerDemo() {
   )
 }
 
-const anomalies = [
-  {
-    cameraId: "CAM001",
-    anomalyDescription: "Unauthorized access detected near main gate.",
-    criticality: "High",
-    timestamp: "2024-11-18 09:15:00",
-  },
-  {
-    cameraId: "CAM002",
-    anomalyDescription: "Suspicious package left unattended in the lobby.",
-    criticality: "Medium",
-    timestamp: "2024-11-18 10:30:00",
-  },
-  {
-    cameraId: "CAM003",
-    anomalyDescription: "Motion detected in restricted area after hours.",
-    criticality: "Critical",
-    timestamp: "2024-11-18 11:45:00",
-  },
-  {
-    cameraId: "CAM004",
-    anomalyDescription: "Fire alarm triggered in basement parking.",
-    criticality: "Critical",
-    timestamp: "2024-11-18 12:00:00",
-  },
-  {
-    cameraId: "CAM005",
-    anomalyDescription: "Vehicle speeding near the facility perimeter.",
-    criticality: "High",
-    timestamp: "2024-11-18 13:20:00",
-  },
-  {
-    cameraId: "CAM006",
-    anomalyDescription: "Security personnel not present at assigned post.",
-    criticality: "Medium",
-    timestamp: "2024-11-18 14:10:00",
-  },
-  {
-    cameraId: "CAM007",
-    anomalyDescription: "Multiple failed access attempts at server room door.",
-    criticality: "High",
-    timestamp: "2024-11-18 15:00:00",
-  },
-  {
-    cameraId: "CAM003",
-    anomalyDescription: "Motion detected in restricted area after hours.",
-    criticality: "Critical",
-    timestamp: "2024-11-18 11:45:00",
-  },
-  {
-    cameraId: "CAM004",
-    anomalyDescription: "Fire alarm triggered in basement parking.",
-    criticality: "Critical",
-    timestamp: "2024-11-18 12:00:00",
-  },
-];
 
 function TableDemo() {
+  const [anomalies, setAnomalies] = useState<AnomalyLog[]>([]);
+  const { data: session } = useSession();
+
+  useEffect(() => {
+    if (!session?.user?.organization?.id) return;
+
+    // Subscribe to real-time updates
+    const unsubscribe = subscribeToAnomalyLogs(
+      session.user.organization.id,
+      (updatedAnomalies) => {
+        setAnomalies(updatedAnomalies);
+      }
+    );
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, [session?.user?.organization?.id]);
+
   return (
     <Table>
       <TableCaption>A list of all detected Anomalies.</TableCaption>
@@ -441,11 +406,24 @@ function TableDemo() {
       </TableHeader>
       <TableBody>
         {anomalies.map((anomaly) => (
-          <TableRow key={anomaly.cameraId}>
+          <TableRow key={anomaly.logId}>
             <TableCell className="font-medium">{anomaly.cameraId}</TableCell>
-            <TableCell>{anomaly.anomalyDescription}</TableCell>
-            <TableCell>{anomaly.timestamp}</TableCell>
-            <TableCell className="text-right">{anomaly.criticality}</TableCell>
+            <TableCell>{anomaly.event}</TableCell>
+            <TableCell>
+              {formatTimestamp(anomaly.timestamp)}
+            </TableCell>
+            <TableCell className="text-right">
+              <span className={cn(
+                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                {
+                  "bg-yellow-100 text-yellow-800": anomaly.criticality === "Moderate",
+                  "bg-orange-100 text-orange-800": anomaly.criticality === "Critical",
+                  "bg-red-100 text-red-800": anomaly.criticality === "Catastrophic",
+                }
+              )}>
+                {anomaly.criticality}
+              </span>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
