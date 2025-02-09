@@ -76,6 +76,8 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({
         // endTime: anomaly.endTime,
         // daysOfWeek: anomaly.daysOfWeek
       };
+      console.log(anomaly.cameras)
+      console.log(anomalyRequest)
 
       const updatedAnomaly = await updateAnomaly(
         organizationId,
