@@ -155,3 +155,41 @@ export const addCamera = async (
       throw error;
     }
   };
+
+  export const fetchOrganizationDetails = async (organizationId: number, token: string) => {
+    try {
+      const response = await axios.get(
+        `${SERVER_URL}/api/organization/${organizationId}/details`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+  
+      if (!response.data || !response.data.organization) {
+        throw new Error('Invalid response from server');
+      }
+  
+      const { organization } = response.data;
+      
+      return {
+        id: organization.id,
+        name: organization.name,
+        maxCameras: organization.maxCameras,
+        cameraCount: organization.cameraCount,
+        usagePercentage: organization.usagePercentage
+      };
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error('Organization details error:', {
+          status: error.response?.status,
+          message: error.response?.data?.message || error.message,
+          data: error.response?.data
+        });
+        throw new Error(`Failed to fetch organization details: ${error.response?.data?.message || error.message}`);
+      }
+      console.error("Error fetching organization details:", error);
+      throw error;
+    }
+  };

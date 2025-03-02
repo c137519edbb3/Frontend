@@ -12,10 +12,10 @@ import { Camera } from "@/types/camera";
 import { addCamera, deleteCamera, updateCamera } from "@/utils/camera-api";
 import { GetServerSideProps } from "next";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Textarea } from "../ui/textarea";
-
+import { fetchOrganizationDetails } from "@/utils/camera-api";
 
 
 
@@ -71,6 +71,39 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
     cameraDescription: ""
   });
   const [formError, setFormError] = useState("");
+  // Add organization details state
+  const [orgDetails, setOrgDetails] = useState({
+    maxCameras: 0,
+    cameraCount: 0,
+    usagePercentage: 0
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch organization details
+  useEffect(() => {
+    const getOrgDetails = async () => {
+      if (!session?.accessToken || !session?.user?.organization?.id) return;
+      
+      try {
+        const details = await fetchOrganizationDetails(
+          session.user.organization.id,
+          session.accessToken
+        );
+        
+        setOrgDetails({
+          maxCameras: details.maxCameras,
+          cameraCount: details.cameraCount,
+          usagePercentage: details.usagePercentage
+        });
+      } catch (error) {
+        console.error("Error fetching organization details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    getOrgDetails();
+  }, [session, cameras]); // Re-fetch when cameras change
 
   // Handle input changes
   const handleInputChange = (
@@ -86,22 +119,29 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
 
   // Handle form submission
   const handleSaveCamera = async () => {
-    if ( !formData.location || !formData.cameraType || !formData.ipAddress) {
+    if (!formData.location || !formData.cameraType || !formData.ipAddress) {
       setFormError("All fields are required!");
       return;
     }
-
+  
     if (!session) {
       console.error("User is not authenticated");
       return;
     }
-
+  
     const { accessToken, user } = session;
     if (!user || !user.organization || !user.organization.id) {
       console.error("Organization information is missing from the session");
       return;
     }
-
+  
+    // Check camera limit
+    if (orgDetails.cameraCount >= orgDetails.maxCameras) {
+      toast.error(`Camera limit reached (${orgDetails.maxCameras}). Please contact support to increase your limit.`);
+      setOpenDialog(false);
+      return;
+    }
+  
     const organizationId = user.organization.id;
     const newCameraData: Camera = {
       cameraId: String(cameras.length + 1),
@@ -111,7 +151,7 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
       status: "ONLINE",
       cameraDescription: formData.cameraDescription
     };
-
+  
     try {
       // console.log(newCameraData);
       const newCamera = await addCamera(organizationId, newCameraData, accessToken);
@@ -217,12 +257,27 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
           <div className="flex justify-between pt-8 items-center mb-4">
             <div className="space-y-1">
               <h2 className="text-2xl font-semibold tracking-tight pl-1">View your cameras</h2>
-              <p className="text-sm text-muted-foreground pl-1">All Cameras under your organization.</p>
+              <p className="text-sm text-muted-foreground pl-1">
+                All Cameras under your organization. 
+                {!isLoading && (
+                  <span className="ml-2 font-medium">
+                    {orgDetails.cameraCount} of {orgDetails.maxCameras} cameras used 
+                    ({orgDetails.usagePercentage}%)
+                  </span>
+                )}
+              </p>
             </div>
+            
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
               <DialogTrigger asChild>
-                <Button className="bg-background hover:bg-background border-2 text-primary" onClick={() => setOpenDialog(true)}>
-                  Add New Camera
+                <Button 
+                  className="bg-background hover:bg-background border-2 text-primary"
+                  onClick={() => setOpenDialog(true)}
+                  disabled={orgDetails.cameraCount >= orgDetails.maxCameras}
+                >
+                  {orgDetails.cameraCount >= orgDetails.maxCameras 
+                    ? "Camera Limit Reached" 
+                    : "Add New Camera"}
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[425px]">
@@ -286,6 +341,21 @@ const CameraWidget = ({ initialCameras = [] }: CameraWidgetProps) => {
               </DialogContent>
             </Dialog>
           </div>
+          
+          {/* Progress bar for camera usage */}
+          <div className="w-full h-2 bg-gray-200 rounded-full mb-4">
+            <div 
+              className={`h-2 rounded-full ${
+                orgDetails.usagePercentage >= 90 
+                  ? 'bg-red-500' 
+                  : orgDetails.usagePercentage >= 70 
+                  ? 'bg-yellow-500' 
+                  : 'bg-green-500'
+              }`}
+              style={{ width: `${orgDetails.usagePercentage}%` }}
+            ></div>
+          </div>
+          
           <Separator className="my-4" />
           <CameraGrid 
             cameras={cameras} 

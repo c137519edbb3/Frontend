@@ -23,7 +23,6 @@ export default async function CameraPage(props: PageProps) {
     const token = session.user.token;
 
     const cameras: Camera[] = await fetchCameras(organizationId, token);
-    // console.log("Cameras:", cameras);
     return <CameraWidget initialCameras={cameras} />;
   } catch (error) {
     console.error("Error fetching cameras:", error);
