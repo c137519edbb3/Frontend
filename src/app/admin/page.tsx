@@ -1,6 +1,5 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -394,40 +393,42 @@ function TableDemo() {
   }, [session?.user?.organization?.id]);
 
   return (
-    <Table>
-      <TableCaption>A list of all detected Anomalies.</TableCaption>
-      <TableHeader>
-        <TableRow>
-          <TableHead className="w-[100px]">Camera Id</TableHead>
-          <TableHead>Anomaly Description</TableHead>
-          <TableHead>Timestamp</TableHead>
-          <TableHead className="text-right">Criticality</TableHead>
-        </TableRow>
-      </TableHeader>
-      <TableBody>
-        {anomalies.map((anomaly) => (
-          <TableRow key={anomaly.logId}>
-            <TableCell className="font-medium">{anomaly.cameraId}</TableCell>
-            <TableCell>{anomaly.event}</TableCell>
-            <TableCell>
-              {formatTimestamp(anomaly.timestamp)}
-            </TableCell>
-            <TableCell className="text-right">
-              <span className={cn(
-                "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
-                {
-                  "bg-yellow-100 text-yellow-800": anomaly.criticality === "Moderate",
-                  "bg-orange-100 text-orange-800": anomaly.criticality === "Critical",
-                  "bg-red-100 text-red-800": anomaly.criticality === "Catastrophic",
-                }
-              )}>
-                {anomaly.criticality}
-              </span>
-            </TableCell>
+    <ScrollArea className="h-[420px]">
+      <Table>
+        <TableCaption>A list of all detected Anomalies.</TableCaption>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="w-[100px]">Camera Id</TableHead>
+            <TableHead>Anomaly Description</TableHead>
+            <TableHead>Timestamp</TableHead>
+            <TableHead className="text-right">Criticality</TableHead>
           </TableRow>
-        ))}
-      </TableBody>
-    </Table>
+        </TableHeader>
+        <TableBody>
+          {anomalies.map((anomaly) => (
+            <TableRow key={anomaly.logId}>
+              <TableCell className="font-medium">{anomaly.cameraId}</TableCell>
+              <TableCell>{anomaly.event}</TableCell>
+              <TableCell>
+                {formatTimestamp(anomaly.timestamp)}
+              </TableCell>
+              <TableCell className="text-right">
+                <span className={cn(
+                  "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                  {
+                    "bg-yellow-100 text-yellow-800": anomaly.criticality === "Moderate",
+                    "bg-orange-100 text-orange-800": anomaly.criticality === "Critical",
+                    "bg-red-100 text-red-800": anomaly.criticality === "Catastrophic",
+                  }
+                )}>
+                  {anomaly.criticality}
+                </span>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </ScrollArea>
   );
 }
 
