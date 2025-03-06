@@ -30,7 +30,10 @@ import { Anomaly } from "@/types/anomalies"
 import { Camera } from "@/types/camera"
 import { AnomalyRequest } from "@/types/anomaly-request"
 import Loading from "@/components/common/Loading"
-import { createAnomaly, deleteAnomaly, getAnomalies, getCameras } from "@/utils/anomaly-api"
+import { createAnomaly, deleteAnomaly, getAnomalies, getCameras } from "@/utils/anomaly-api";
+import { cn } from "@/lib/utils";
+import { formatTimestamp } from "@/utils/date-utils";
+import { subscribeToAnomalyLogs, type AnomalyLog } from '@/services/firebaseService';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
@@ -43,6 +46,8 @@ function Anomalies() {
   const [anomalies, setAnomalies] = useState<Anomaly[]>([]);
   const [cameras, setCameras] = useState<Camera[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedAnomalyLog, setSelectedAnomalyLog] = useState<AnomalyLog | null>(null);
+  const [anomalyLogs, setAnomalyLogs] = useState<AnomalyLog[]>([]);
 
   // Fetch anomalies from the server: /api/organization/<organizationId>/anomalies
   useEffect(() => {
@@ -74,6 +79,21 @@ function Anomalies() {
         setLoading(false);
       });
   }, [accessToken, organizationId]);
+
+  // Add Firebase subscription
+  useEffect(() => {
+    if (!organizationId) return;
+
+    const unsubscribe = subscribeToAnomalyLogs(
+      organizationId,
+      (updatedLogs) => {
+        setAnomalyLogs(updatedLogs);
+        setLoading(false);
+      }
+    );
+
+    return () => unsubscribe();
+  }, [organizationId]);
 
   const handleDeleteClick = async (anomalyId: number) => {
     try {
@@ -147,7 +167,7 @@ function Anomalies() {
   ];
 
   const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState[]>([]);
 
 
   const table = useReactTable({
@@ -330,35 +350,96 @@ function Anomalies() {
       </TabsContent >
 
       <TabsContent value="Anomaly Logs" className="h-[85vh] border-1 rounded mt-8">
-      
-      <ResizablePanelGroup direction="horizontal" className="w-full rounded border" >
-        <ResizablePanel defaultSize={40} minSize={20}>
-          <SearchBox />
-          <ScrollArea className="h-[85vh]">
+        <ResizablePanelGroup direction="horizontal" className="w-full rounded border">
+          <ResizablePanel defaultSize={40} minSize={20}>
+            <SearchBox />
+            <ScrollArea className="h-[85vh]">
+              <div className="px-4">
+                <ul className="space-y-2">
+                  {anomalyLogs.map((log) => (
+                    <li
+                      key={log.logId}
+                      className={cn(
+                        "p-4 rounded cursor-pointer transition-colors",
+                        selectedAnomalyLog?.logId === log.logId
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary hover:bg-secondary/80"
+                      )}
+                      onClick={() => setSelectedAnomalyLog(log)}
+                    >
+                      <div className="font-medium">Anomaly #{log.logId}</div>
+                      <div className="text-sm truncate">{log.event}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {formatTimestamp(log.timestamp)}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </ScrollArea>
+          </ResizablePanel>
 
-            <div className="px-4">
-              <ul className="space-y-2">
-                {Array.from({ length: 50 }, (_, i) => (
-                  <li
-                    key={i}
-                    className="p-2 bg-gray-100 rounded hover:bg-gray-200 cursor-pointer"
-                  >
-                    Item {i + 1}
-                  </li>
-                ))}
-              </ul>
-            </div>
-            
-          </ScrollArea>
-        </ResizablePanel>
-        <ResizableHandle withHandle={true} />
-        <ResizablePanel defaultSize={60} minSize={30}>
-          <div className="bg-red">
-            <p>gergaregaer</p>
-          </div>
-        </ResizablePanel>
-      </ResizablePanelGroup>
+          <ResizableHandle withHandle={true} />
 
+          <ResizablePanel defaultSize={60} minSize={30}>
+            {selectedAnomalyLog ? (
+              <div className="p-6">
+                <h2 className="text-2xl font-bold mb-4">
+                  Anomaly Details #{selectedAnomalyLog.logId}
+                </h2>
+                <div className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label>Event Description</Label>
+                    <div className="p-3 bg-secondary rounded-md">
+                      {selectedAnomalyLog.event}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Camera ID</Label>
+                    <div className="p-3 bg-secondary rounded-md">
+                      {selectedAnomalyLog.cameraId}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Timestamp</Label>
+                    <div className="p-3 bg-secondary rounded-md">
+                      {formatTimestamp(selectedAnomalyLog.timestamp)}
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Confidence</Label>
+                    <div className="p-3 bg-secondary rounded-md">
+                      {(selectedAnomalyLog.confidence * 100).toFixed(2)}%
+                    </div>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Criticality</Label>
+                    <div className="p-3 bg-secondary rounded-md">
+                      <span className={cn(
+                        "inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium",
+                        {
+                          "bg-yellow-100 text-yellow-800": selectedAnomalyLog.criticality === "Moderate",
+                          "bg-orange-100 text-orange-800": selectedAnomalyLog.criticality === "Critical",
+                          "bg-red-100 text-red-800": selectedAnomalyLog.criticality === "Catastrophic",
+                        }
+                      )}>
+                        {selectedAnomalyLog.criticality}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-center justify-center h-full text-muted-foreground">
+                Select an anomaly to view details
+              </div>
+            )}
+          </ResizablePanel>
+        </ResizablePanelGroup>
       </TabsContent>
 
       </Tabs>
