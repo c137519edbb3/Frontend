@@ -448,7 +448,38 @@ const CameraDetailsGrid = () => {
   const [selectedCamera, setSelectedCamera] = useState<Camera | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [streamRef, setStreamRef] = useState<HTMLImageElement | null>(null);
   const { data: session } = useSession();
+
+  // Function to stop stream
+  const stopStream = () => {
+    if (streamRef) {
+      streamRef.src = '';
+      setStreamRef(null);
+    }
+  };
+
+  // Handle dialog state changes
+  const handleDialogChange = (open: boolean) => {
+    setIsDialogOpen(open);
+    if (!open) {
+      stopStream();
+      setSelectedCamera(null);
+    }
+  };
+
+  // Handle camera selection and stream start
+  const handleCameraClick = (camera: Camera) => {
+    setSelectedCamera(camera);
+    setIsDialogOpen(true);
+  };
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      stopStream();
+    };
+  }, []);
 
   useEffect(() => {
     const fetchCameras = async () => {
@@ -475,11 +506,6 @@ const CameraDetailsGrid = () => {
       fetchCameras();
     }
   }, [session]);
-
-  const handleCameraClick = (camera: Camera) => {
-    setSelectedCamera(camera);
-    setIsDialogOpen(true);
-  };
 
   if (isLoading) {
     return <div>Loading cameras...</div>;
@@ -512,7 +538,7 @@ const CameraDetailsGrid = () => {
         </div>
       </ScrollArea>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isDialogOpen} onOpenChange={handleDialogChange}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh]">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
@@ -529,11 +555,16 @@ const CameraDetailsGrid = () => {
           </DialogHeader>
           
           <div className="mt-4 bg-black rounded-lg aspect-video w-full relative">
-            {selectedCamera?.ipAddress.includes('video') ? (
+            {selectedCamera?.ipAddress ? (
               <img 
+                ref={(el) => setStreamRef(el)}
                 src={selectedCamera.ipAddress} 
                 alt="Camera Stream"
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  console.error('Stream error:', e);
+                  e.currentTarget.src = ''; // Clear source on error
+                }}
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center text-white">
