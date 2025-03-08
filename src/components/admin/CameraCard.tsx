@@ -3,7 +3,7 @@ import { Camera } from '@/types/camera';
 import Image from 'next/image';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Separator } from '../ui/separator';
-import { Pencil, Trash } from 'lucide-react';
+import { Pencil, Trash, ChevronRight } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
@@ -29,6 +29,7 @@ interface CameraCardProps {
       NormalConditions: camera.NormalConditions || []
     });
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
   
     const stateColors = {
       ONLINE: 'bg-green-500',
@@ -165,35 +166,54 @@ interface CameraCardProps {
                     className="col-span-3"
                   />
                 </div>
-                <div className="grid grid-cols-4 items-start gap-4">
-                  <Label htmlFor="normalConditions" className="text-right pt-2">
-                    Normal Conditions
-                  </Label>
-                  <div className="col-span-3 space-y-2">
-                    {editFormData.NormalConditions?.map((condition, index) => (
-                      <div key={condition.conditionId} className="flex gap-2">
-                        <Input
-                          value={condition.description}
-                          onChange={(e) => handleNormalConditionChange(index, e.target.value)}
-                          placeholder="Enter normal condition"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeNormalCondition(index)}
-                        >
-                          ✕
-                        </Button>
-                      </div>
-                    ))}
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={addNormalCondition}
+                <div className="space-y-4">
+                  <Separator className="my-4" />
+                  <div className="space-y-2">
+                    <div
+                      className="flex items-center justify-between cursor-pointer"
+                      onClick={() => setIsAdvancedOpen(!isAdvancedOpen)}
                     >
-                      Add Normal Condition
-                    </Button>
+                      <h4 className="text-sm font-semibold">Advanced Settings</h4>
+                      <ChevronRight 
+                        className={`h-4 w-4 transition-transform ${isAdvancedOpen ? 'rotate-90' : ''}`}
+                      />
+                    </div>
+                    
+                    {isAdvancedOpen && (
+                      <div className="space-y-4 pt-2">
+                        <div className="grid grid-cols-4 items-start gap-4">
+                          <Label htmlFor="normalConditions" className="text-right pt-2">
+                            Normal Conditions
+                          </Label>
+                          <div className="col-span-3 space-y-2">
+                            {editFormData.NormalConditions?.map((condition, index) => (
+                              <div key={condition.conditionId} className="flex gap-2">
+                                <Input
+                                  value={condition.description}
+                                  onChange={(e) => handleNormalConditionChange(index, e.target.value)}
+                                  placeholder="Enter normal condition"
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => removeNormalCondition(index)}
+                                >
+                                  ✕
+                                </Button>
+                              </div>
+                            ))}
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={addNormalCondition}
+                            >
+                              Add Normal Condition
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
