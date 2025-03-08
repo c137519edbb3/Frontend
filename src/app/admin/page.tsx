@@ -5,23 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { formatTimestamp } from '@/utils/date-utils';
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ActivitySquare, Users, CreditCard, Activity, Shell, Camera } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuPortal,
-  DropdownMenuSeparator,
-  DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { User } from "lucide-react";
+import { Camera } from "lucide-react";
 
 import {
   Dialog,
@@ -36,29 +20,10 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-
-import {
-  Cloud,
-  Github,
-  Keyboard,
-  LifeBuoy,
-  LogOut,
-  Mail,
-  Calculator,
-  Settings,
-  Smile,
-  MessageSquare,
-  Plus,
-  PlusCircle,
-  UserPlus,
-} from "lucide-react"
- 
-
+} from "@/components/ui/table";
 
 import { format } from "date-fns"
 import { CalendarIcon } from "lucide-react"
@@ -69,8 +34,7 @@ import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover"
-import { Command, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
+} from "@/components/ui/popover";
 
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
 
@@ -93,124 +57,121 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import Header from '@/components/common/navbar';
-import { useRouter } from 'next/router';
 import { useSession } from 'next-auth/react';
-import { redirect } from 'next/navigation';
 import Loading from '@/components/common/Loading';
 import { AnomalyLog, subscribeToAnomalyLogs } from '@/services/firebaseService';
-import { Timestamp } from 'firebase/firestore';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
 
 const chartData = [
-  { date: "2024-04-01", High: 222, moderate: 150 },
-  { date: "2024-04-02", High: 97, moderate: 180 },
-  { date: "2024-04-03", High: 167, moderate: 120 },
-  { date: "2024-04-04", High: 242, moderate: 260 },
-  { date: "2024-04-05", High: 373, moderate: 290 },
-  { date: "2024-04-06", High: 301, moderate: 340 },
-  { date: "2024-04-07", High: 245, moderate: 180 },
-  { date: "2024-04-08", High: 409, moderate: 320 },
-  { date: "2024-04-09", High: 59, moderate: 110 },
-  { date: "2024-04-10", High: 261, moderate: 190 },
-  { date: "2024-04-11", High: 327, moderate: 350 },
-  { date: "2024-04-12", High: 292, moderate: 210 },
-  { date: "2024-04-13", High: 342, moderate: 380 },
-  { date: "2024-04-14", High: 137, moderate: 220 },
-  { date: "2024-04-15", High: 120, moderate: 170 },
-  { date: "2024-04-16", High: 138, moderate: 190 },
-  { date: "2024-04-17", High: 446, moderate: 360 },
-  { date: "2024-04-18", High: 364, moderate: 410 },
-  { date: "2024-04-19", High: 243, moderate: 180 },
-  { date: "2024-04-20", High: 89, moderate: 150 },
-  { date: "2024-04-21", High: 137, moderate: 200 },
-  { date: "2024-04-22", High: 224, moderate: 170 },
-  { date: "2024-04-23", High: 138, moderate: 230 },
-  { date: "2024-04-24", High: 387, moderate: 290 },
-  { date: "2024-04-25", High: 215, moderate: 250 },
-  { date: "2024-04-26", High: 75, moderate: 130 },
-  { date: "2024-04-27", High: 383, moderate: 420 },
-  { date: "2024-04-28", High: 122, moderate: 180 },
-  { date: "2024-04-29", High: 315, moderate: 240 },
-  { date: "2024-04-30", High: 454, moderate: 380 },
-  { date: "2024-05-01", High: 165, moderate: 220 },
-  { date: "2024-05-02", High: 293, moderate: 310 },
-  { date: "2024-05-03", High: 247, moderate: 190 },
-  { date: "2024-05-04", High: 385, moderate: 420 },
-  { date: "2024-05-05", High: 481, moderate: 390 },
-  { date: "2024-05-06", High: 498, moderate: 520 },
-  { date: "2024-05-07", High: 388, moderate: 300 },
-  { date: "2024-05-08", High: 149, moderate: 210 },
-  { date: "2024-05-09", High: 227, moderate: 180 },
-  { date: "2024-05-10", High: 293, moderate: 330 },
-  { date: "2024-05-11", High: 335, moderate: 270 },
-  { date: "2024-05-12", High: 197, moderate: 240 },
-  { date: "2024-05-13", High: 197, moderate: 160 },
-  { date: "2024-05-14", High: 448, moderate: 490 },
-  { date: "2024-05-15", High: 473, moderate: 380 },
-  { date: "2024-05-16", High: 338, moderate: 400 },
-  { date: "2024-05-17", High: 499, moderate: 420 },
-  { date: "2024-05-18", High: 315, moderate: 350 },
-  { date: "2024-05-19", High: 235, moderate: 180 },
-  { date: "2024-05-20", High: 177, moderate: 230 },
-  { date: "2024-05-21", High: 82, moderate: 140 },
-  { date: "2024-05-22", High: 81, moderate: 120 },
-  { date: "2024-05-23", High: 252, moderate: 290 },
-  { date: "2024-05-24", High: 294, moderate: 220 },
-  { date: "2024-05-25", High: 201, moderate: 250 },
-  { date: "2024-05-26", High: 213, moderate: 170 },
-  { date: "2024-05-27", High: 420, moderate: 460 },
-  { date: "2024-05-28", High: 233, moderate: 190 },
-  { date: "2024-05-29", High: 78, moderate: 130 },
-  { date: "2024-05-30", High: 340, moderate: 280 },
-  { date: "2024-05-31", High: 178, moderate: 230 },
-  { date: "2024-06-01", High: 178, moderate: 200 },
-  { date: "2024-06-02", High: 470, moderate: 410 },
-  { date: "2024-06-03", High: 103, moderate: 160 },
-  { date: "2024-06-04", High: 439, moderate: 380 },
-  { date: "2024-06-05", High: 88, moderate: 140 },
-  { date: "2024-06-06", High: 294, moderate: 250 },
-  { date: "2024-06-07", High: 323, moderate: 370 },
-  { date: "2024-06-08", High: 385, moderate: 320 },
-  { date: "2024-06-09", High: 438, moderate: 480 },
-  { date: "2024-06-10", High: 155, moderate: 200 },
-  { date: "2024-06-11", High: 92, moderate: 150 },
-  { date: "2024-06-12", High: 492, moderate: 420 },
-  { date: "2024-06-13", High: 81, moderate: 130 },
-  { date: "2024-06-14", High: 426, moderate: 380 },
-  { date: "2024-06-15", High: 307, moderate: 350 },
-  { date: "2024-06-16", High: 371, moderate: 310 },
-  { date: "2024-06-17", High: 475, moderate: 520 },
-  { date: "2024-06-18", High: 107, moderate: 170 },
-  { date: "2024-06-19", High: 341, moderate: 290 },
-  { date: "2024-06-20", High: 408, moderate: 450 },
-  { date: "2024-06-21", High: 169, moderate: 210 },
-  { date: "2024-06-22", High: 317, moderate: 270 },
-  { date: "2024-06-23", High: 480, moderate: 530 },
-  { date: "2024-06-24", High: 132, moderate: 180 },
-  { date: "2024-06-25", High: 141, moderate: 190 },
-  { date: "2024-06-26", High: 434, moderate: 380 },
-  { date: "2024-06-27", High: 448, moderate: 490 },
-  { date: "2024-06-28", High: 149, moderate: 200 },
-  { date: "2024-06-29", High: 103, moderate: 160 },
-  { date: "2024-06-30", High: 446, moderate: 400 },
+  { date: "2024-04-01", moderate: 150, critical: 120, catastrophic: 80 },
+  { date: "2024-04-02", moderate: 180, critical: 100, catastrophic: 70 },
+  { date: "2024-04-03", moderate: 120, critical: 110, catastrophic: 60 },
+  { date: "2024-04-04", moderate: 260, critical: 130, catastrophic: 90 },
+  { date: "2024-04-05", moderate: 290, critical: 140, catastrophic: 100 },
+  { date: "2024-04-06", moderate: 340, critical: 150, catastrophic: 110 },
+  { date: "2024-04-07", moderate: 180, critical: 160, catastrophic: 120 },
+  { date: "2024-04-08", moderate: 320, critical: 170, catastrophic: 130 },
+  { date: "2024-04-09", moderate: 110, critical: 180, catastrophic: 140 },
+  { date: "2024-04-10", moderate: 190, critical: 190, catastrophic: 150 },
+  { date: "2024-04-11", moderate: 350, critical: 200, catastrophic: 160 },
+  { date: "2024-04-12", moderate: 210, critical: 210, catastrophic: 170 },
+  { date: "2024-04-13", moderate: 380, critical: 220, catastrophic: 180 },
+  { date: "2024-04-14", moderate: 220, critical: 230, catastrophic: 190 },
+  { date: "2024-04-15", moderate: 170, critical: 240, catastrophic: 200 },
+  { date: "2024-04-16", moderate: 190, critical: 250, catastrophic: 210 },
+  { date: "2024-04-17", moderate: 360, critical: 260, catastrophic: 220 },
+  { date: "2024-04-18", moderate: 410, critical: 270, catastrophic: 230 },
+  { date: "2024-04-19", moderate: 180, critical: 280, catastrophic: 240 },
+  { date: "2024-04-20", moderate: 150, critical: 290, catastrophic: 250 },
+  { date: "2024-04-21", moderate: 200, critical: 300, catastrophic: 260 },
+  { date: "2024-04-22", moderate: 170, critical: 310, catastrophic: 270 },
+  { date: "2024-04-23", moderate: 230, critical: 320, catastrophic: 280 },
+  { date: "2024-04-24", moderate: 290, critical: 330, catastrophic: 290 },
+  { date: "2024-04-25", moderate: 250, critical: 340, catastrophic: 300 },
+  { date: "2024-04-26", moderate: 130, critical: 350, catastrophic: 310 },
+  { date: "2024-04-27", moderate: 420, critical: 360, catastrophic: 320 },
+  { date: "2024-04-28", moderate: 180, critical: 370, catastrophic: 330 },
+  { date: "2024-04-29", moderate: 240, critical: 380, catastrophic: 340 },
+  { date: "2024-04-30", moderate: 380, critical: 390, catastrophic: 350 },
+  { date: "2024-05-01", moderate: 220, critical: 400, catastrophic: 360 },
+  { date: "2024-05-02", moderate: 310, critical: 410, catastrophic: 370 },
+  { date: "2024-05-03", moderate: 190, critical: 420, catastrophic: 380 },
+  { date: "2024-05-04", moderate: 420, critical: 430, catastrophic: 390 },
+  { date: "2024-05-05", moderate: 390, critical: 440, catastrophic: 400 },
+  { date: "2024-05-06", moderate: 520, critical: 450, catastrophic: 410 },
+  { date: "2024-05-07", moderate: 300, critical: 460, catastrophic: 420 },
+  { date: "2024-05-08", moderate: 210, critical: 470, catastrophic: 430 },
+  { date: "2024-05-09", moderate: 180, critical: 480, catastrophic: 440 },
+  { date: "2024-05-10", moderate: 330, critical: 490, catastrophic: 450 },
+  { date: "2024-05-11", moderate: 270, critical: 500, catastrophic: 460 },
+  { date: "2024-05-12", moderate: 240, critical: 510, catastrophic: 470 },
+  { date: "2024-05-13", moderate: 160, critical: 520, catastrophic: 480 },
+  { date: "2024-05-14", moderate: 490, critical: 530, catastrophic: 490 },
+  { date: "2024-05-15", moderate: 380, critical: 540, catastrophic: 500 },
+  { date: "2024-05-16", moderate: 400, critical: 550, catastrophic: 510 },
+  { date: "2024-05-17", moderate: 420, critical: 560, catastrophic: 520 },
+  { date: "2024-05-18", moderate: 350, critical: 570, catastrophic: 530 },
+  { date: "2024-05-19", moderate: 180, critical: 580, catastrophic: 540 },
+  { date: "2024-05-20", moderate: 230, critical: 590, catastrophic: 550 },
+  { date: "2024-05-21", moderate: 140, critical: 600, catastrophic: 560 },
+  { date: "2024-05-22", moderate: 120, critical: 610, catastrophic: 570 },
+  { date: "2024-05-23", moderate: 290, critical: 620, catastrophic: 580 },
+  { date: "2024-05-24", moderate: 220, critical: 630, catastrophic: 590 },
+  { date: "2024-05-25", moderate: 250, critical: 640, catastrophic: 600 },
+  { date: "2024-05-26", moderate: 170, critical: 650, catastrophic: 610 },
+  { date: "2024-05-27", moderate: 460, critical: 660, catastrophic: 620 },
+  { date: "2024-05-28", moderate: 190, critical: 670, catastrophic: 630 },
+  { date: "2024-05-29", moderate: 130, critical: 680, catastrophic: 640 },
+  { date: "2024-05-30", moderate: 280, critical: 690, catastrophic: 650 },
+  { date: "2024-05-31", moderate: 230, critical: 700, catastrophic: 660 },
+  { date: "2024-06-01", moderate: 200, critical: 710, catastrophic: 670 },
+  { date: "2024-06-02", moderate: 410, critical: 720, catastrophic: 680 },
+  { date: "2024-06-03", moderate: 160, critical: 730, catastrophic: 690 },
+  { date: "2024-06-04", moderate: 380, critical: 740, catastrophic: 700 },
+  { date: "2024-06-05", moderate: 140, critical: 750, catastrophic: 710 },
+  { date: "2024-06-06", moderate: 250, critical: 760, catastrophic: 720 },
+  { date: "2024-06-07", moderate: 370, critical: 770, catastrophic: 730 },
+  { date: "2024-06-08", moderate: 320, critical: 780, catastrophic: 740 },
+  { date: "2024-06-09", moderate: 480, critical: 790, catastrophic: 750 },
+  { date: "2024-06-10", moderate: 200, critical: 800, catastrophic: 760 },
+  { date: "2024-06-11", moderate: 150, critical: 810, catastrophic: 770 },
+  { date: "2024-06-12", moderate: 420, critical: 820, catastrophic: 780 },
+  { date: "2024-06-13", moderate: 130, critical: 830, catastrophic: 790 },
+  { date: "2024-06-14", moderate: 380, critical: 840, catastrophic: 800 },
+  { date: "2024-06-15", moderate: 350, critical: 850, catastrophic: 810 },
+  { date: "2024-06-16", moderate: 310, critical: 860, catastrophic: 820 },
+  { date: "2024-06-17", moderate: 520, critical: 870, catastrophic: 830 },
+  { date: "2024-06-18", moderate: 170, critical: 880, catastrophic: 840 },
+  { date: "2024-06-19", moderate: 290, critical: 890, catastrophic: 850 },
+  { date: "2024-06-20", moderate: 450, critical: 900, catastrophic: 860 },
+  { date: "2024-06-21", moderate: 210, critical: 910, catastrophic: 870 },
+  { date: "2024-06-22", moderate: 270, critical: 920, catastrophic: 880 },
+  { date: "2024-06-23", moderate: 530, critical: 930, catastrophic: 890 },
+  { date: "2024-06-24", moderate: 180, critical: 940, catastrophic: 900 },
+  { date: "2024-06-25", moderate: 190, critical: 950, catastrophic: 910 },
+  { date: "2024-06-26", moderate: 380, critical: 960, catastrophic: 920 },
+  { date: "2024-06-27", moderate: 490, critical: 970, catastrophic: 930 },
+  { date: "2024-06-28", moderate: 200, critical: 980, catastrophic: 940 },
+  { date: "2024-06-29", moderate: 160, critical: 990, catastrophic: 950 },
+  { date: "2024-06-30", moderate: 400, critical: 1000, catastrophic: 960 },
 ];
 
 
 const chartConfig = {
-  visitors: {
-    label: "Visitors",
+  moderate: {
+    label: "Moderate",
+    color: "hsl(45, 100%, 50%)", // yellow
   },
-  desktop: {
-    label: "Desktop",
-    color: "hsl(var(--chart-1))",
+  critical: {
+    label: "Critical",
+    color: "hsl(30, 100%, 50%)", // orange
   },
-  mobile: {
-    label: "Mobile",
-    color: "hsl(var(--chart-2))",
+  catastrophic: {
+    label: "Catastrophic",
+    color: "hsl(0, 100%, 50%)", // red
   },
 } satisfies ChartConfig
 
@@ -267,27 +228,39 @@ function Component() {
         >
           <AreaChart data={filteredData}>
             <defs>
-              <linearGradient id="fillDesktop" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillModerate" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-moderate)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-desktop)"
+                  stopColor="var(--color-moderate)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
-              <linearGradient id="fillMobile" x1="0" y1="0" x2="0" y2="1">
+              <linearGradient id="fillCritical" x1="0" y1="0" x2="0" y2="1">
                 <stop
                   offset="5%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-critical)"
                   stopOpacity={0.8}
                 />
                 <stop
                   offset="95%"
-                  stopColor="var(--color-mobile)"
+                  stopColor="var(--color-critical)"
+                  stopOpacity={0.1}
+                />
+              </linearGradient>
+              <linearGradient id="fillCatastrophic" x1="0" y1="0" x2="0" y2="1">
+                <stop
+                  offset="5%"
+                  stopColor="var(--color-catastrophic)"
+                  stopOpacity={0.8}
+                />
+                <stop
+                  offset="95%"
+                  stopColor="var(--color-catastrophic)"
                   stopOpacity={0.1}
                 />
               </linearGradient>
@@ -322,20 +295,27 @@ function Component() {
               }
             />
             <Area
-              dataKey="High"
+              dataKey="moderate"
               type="natural"
-              fill="url(#fillMobile)"
-              stroke="var(--color-mobile)"
+              fill="url(#fillModerate)"
+              stroke="var(--color-moderate)"
               stackId="a"
             />
             <Area
-              dataKey="moderate"
+              dataKey="critical"
               type="natural"
-              fill="url(#fillDesktop)"
-              stroke="var(--color-desktop)"
+              fill="url(#fillCritical)"
+              stroke="var(--color-critical)"
               stackId="a"
             />
-            {/* <ChartLegend content={<ChartLegendContent />} /> */}
+            <Area
+              dataKey="catastrophic"
+              type="natural"
+              fill="url(#fillCatastrophic)"
+              stroke="var(--color-catastrophic)"
+              stackId="a"
+            />
+            <ChartLegend content={<ChartLegendContent />} />
           </AreaChart>
         </ChartContainer>
       </CardContent>
