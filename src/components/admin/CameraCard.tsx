@@ -25,7 +25,8 @@ interface CameraCardProps {
       location: camera.location,
       cameraType: camera.cameraType,
       ipAddress: camera.ipAddress,
-      cameraDescription: camera.cameraDescription
+      cameraDescription: camera.cameraDescription,
+      NormalConditions: camera.NormalConditions || []
     });
     const [isSheetOpen, setIsSheetOpen] = useState(false);
   
@@ -43,8 +44,47 @@ interface CameraCardProps {
     };
   
     const handleSaveChanges = () => {
-      onUpdate(camera.cameraId, editFormData);
+      onUpdate(camera.cameraId, {
+        location: editFormData.location,
+        cameraType: editFormData.cameraType,
+        ipAddress: editFormData.ipAddress,
+        cameraDescription: editFormData.cameraDescription,
+        NormalConditions: editFormData.NormalConditions
+      });
       setIsSheetOpen(false);
+    };
+
+    const handleNormalConditionChange = (index: number, value: string) => {
+      setEditFormData(prev => {
+        const updatedConditions = [...(prev.NormalConditions || [])];
+        if (updatedConditions[index]) {
+          updatedConditions[index] = {
+            ...updatedConditions[index],
+            description: value
+          };
+        }
+        return {
+          ...prev,
+          NormalConditions: updatedConditions
+        };
+      });
+    };
+    
+    const addNormalCondition = () => {
+      setEditFormData(prev => ({
+        ...prev,
+        NormalConditions: [
+          ...(prev.NormalConditions || []),
+          { conditionId: Date.now(), description: '' }
+        ]
+      }));
+    };
+    
+    const removeNormalCondition = (index: number) => {
+      setEditFormData(prev => ({
+        ...prev,
+        NormalConditions: (prev.NormalConditions || []).filter((_, i) => i !== index)
+      }));
     };
   
     return (
@@ -124,6 +164,37 @@ interface CameraCardProps {
                     onChange={handleInputChange}
                     className="col-span-3"
                   />
+                </div>
+                <div className="grid grid-cols-4 items-start gap-4">
+                  <Label htmlFor="normalConditions" className="text-right pt-2">
+                    Normal Conditions
+                  </Label>
+                  <div className="col-span-3 space-y-2">
+                    {editFormData.NormalConditions?.map((condition, index) => (
+                      <div key={condition.conditionId} className="flex gap-2">
+                        <Input
+                          value={condition.description}
+                          onChange={(e) => handleNormalConditionChange(index, e.target.value)}
+                          placeholder="Enter normal condition"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeNormalCondition(index)}
+                        >
+                          ✕
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addNormalCondition}
+                    >
+                      Add Normal Condition
+                    </Button>
+                  </div>
                 </div>
               </div>
               <SheetFooter>

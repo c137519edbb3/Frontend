@@ -15,14 +15,15 @@ export const fetchCameras = async (organizationId: number, token: string) => {
       }
     );
     const cameras: Camera[] = response.data.cameras.map((camera: any) => ({
-        cameraId: camera.cameraId.toString(),
-        status: camera.status,
-        ipAddress: camera.ipAddress,
-        location: camera.location,
-        cameraType: camera.cameraType,
-        cameraDescription: camera.cameraDescription,
-      }));
-  
+      cameraId: camera.cameraId.toString(),
+      status: camera.status,
+      ipAddress: camera.ipAddress,
+      location: camera.location,
+      cameraType: camera.cameraType,
+      cameraDescription: camera.cameraDescription,
+      NormalConditions: camera.NormalConditions
+    }));
+
     return cameras;
   } catch (error) {
     console.error("Error fetching cameras:", error);
@@ -46,6 +47,7 @@ export const updateCamera = async (
       ipAddress: cameraData.ipAddress?.trim(),
       cameraType: cameraData.cameraType?.trim(),
       cameraDescription: cameraData.cameraDescription?.trim(),
+      normalConditions: cameraData.NormalConditions
     };
 
     const response = await axios.put(
@@ -59,8 +61,6 @@ export const updateCamera = async (
       }
     );
 
-    console.log(response)
-
     if (!response.data || !response.data.camera) {
       throw new Error('Invalid response from server');
     }
@@ -72,6 +72,7 @@ export const updateCamera = async (
       location: response.data.camera.location,
       cameraType: response.data.camera.cameraType,
       cameraDescription: response.data.camera.cameraDescription,
+      NormalConditions: response.data.camera.NormalConditions
     };
 
   } catch (error) {
