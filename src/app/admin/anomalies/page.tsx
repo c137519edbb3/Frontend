@@ -135,6 +135,19 @@ function Anomalies() {
       enableSorting: true,
     },
     {
+      accessorKey: "Cameras",
+      header: "Camera Locations",
+      cell: ({ row }: any) => {
+        const cameras = row.original.Cameras;
+        if (!cameras || cameras.length === 0) return "No cameras assigned";
+        
+        return cameras.map(camera => (
+          `${camera.location} (${camera.cameraId})`
+        )).join(", ");
+      },
+      enableSorting: false,
+    },
+    {
       id: "scheduledTime",
       header: "Scheduled Time",
       cell: ({ row }: { row: any }) => {
