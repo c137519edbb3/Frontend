@@ -1,11 +1,66 @@
 "use client"
+import { SideBarWidget } from "@/components/common/sideBar";
+import { 
+  IconDashboard, 
+  IconSettings, 
+  IconUserShield,
+  IconUsers,
+  IconBuildingSkyscraper,
+  IconReportAnalytics,
+  IconFileText
+} from "@tabler/icons-react";
 
-import { Sidebar, SidebarBody,  SidebarLink, SidebarProvider} from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils";
-import { IconArrowLeft, IconBrandTabler, IconSettings, IconUserBolt } from "@tabler/icons-react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import { useState } from "react";
+const links = [
+  {
+    label: "Dashboard",
+    href: "/super-admin",
+    icon: (
+      <IconDashboard className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Organizations",
+    href: "/super-admin/organizations",
+    icon: (
+      <IconBuildingSkyscraper className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Users",
+    href: "/super-admin/users",
+    icon: (
+      <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Admin Management",
+    href: "/super-admin/admins",
+    icon: (
+      <IconUserShield className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Reports",
+    href: "/super-admin/reports",
+    icon: (
+      <IconFileText className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Analytics",
+    href: "/super-admin/analytics",
+    icon: (
+      <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+  {
+    label: "Settings",
+    href: "/super-admin/settings",
+    icon: (
+      <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+    ),
+  },
+];
 
 export default function SuperAdminLayout({
   children,
@@ -13,95 +68,9 @@ export default function SuperAdminLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // <ProtectedRoute>
-    //    <SidebarHeader />
-    //   <SidebarProvider>
-    //     <AppSidebar />
-    //     <main>
-    //       <SidebarTrigger />
-    //       {children}
-    //     </main>
-    //   </SidebarProvider>
-    // </ProtectedRoute>
-
-        <main>
-          {children}
-        </main>
-      
-  );
-}
-
-
-function SidebarDemo() {
-  const links = [
-    {
-      label: "Dashboard",
-      href: "#",
-      icon: (
-        <IconBrandTabler className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Profile",
-      href: "#",
-      icon: (
-        <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Settings",
-      href: "#",
-      icon: (
-        <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-    {
-      label: "Logout",
-      href: "#",
-      icon: (
-        <IconArrowLeft className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-      ),
-    },
-  ];
-  const [open, setOpen] = useState(false);
-  return (
-    <div
-      className={cn(
-        "rounded-md flex flex-col md:flex-row bg-gray-100 dark:bg-neutral-800 w-full flex-1 max-w-7xl mx-auto border border-neutral-200 dark:border-neutral-700 overflow-hidden",
-        "h-[60vh]" // for your use case, use `h-screen` instead of `h-[60vh]`
-      )}
-    >
-      <Sidebar open={open} setOpen={setOpen}>
-        <SidebarBody className="justify-between gap-10">
-          <div className="flex flex-col flex-1 overflow-y-auto overflow-x-hidden">
-            {/* {open ? <Logo /> : <LogoIcon />} */}
-            <div className="mt-8 flex flex-col gap-2">
-              {links.map((link, idx) => (
-                <SidebarLink key={idx} link={link} />
-              ))}
-            </div>
-          </div>
-          <div>
-            <SidebarLink
-              link={{
-                label: "Manu Arora",
-                href: "#",
-                icon: (
-                  <img
-                    src="https://assets.aceternity.com/manu.png"
-                    className="h-7 w-7 flex-shrink-0 rounded-full"
-                    width={50} 
-                    height={50}
-                    alt="Avatar"
-                  />
-                ),
-              }}
-            />
-          </div>
-        </SidebarBody>
-      </Sidebar>
-     
-    </div>
+    <SideBarWidget links={links}>
+      {children}
+    </SideBarWidget>
   );
 }
 
@@ -132,4 +101,3 @@ const LogoIcon = () => {
     </Link>
   );
 };
- 
