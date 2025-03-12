@@ -22,9 +22,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent } from "@/components/ui/card";
-import { IconPlus, IconSettings, IconUser, IconCamera } from "@tabler/icons-react";
+import { 
+  IconPlus, 
+  IconSettings, 
+  IconUser, 
+  IconCamera,
+  IconUserPlus  
+} from "@tabler/icons-react";
 import { toast } from "sonner";
-import { updateOrganization } from "@/utils/organization-api";
+import { updateOrganization, addOrganizationAdmin } from "@/utils/organization-api";
 
 // Types
 interface Organization {
@@ -63,6 +69,7 @@ export default function OrganizationsPage() {
   const [error, setError] = useState<string | null>(null);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isAddAdminDialogOpen, setIsAddAdminDialogOpen] = useState(false);
   const [newOrgData, setNewOrgData] = useState({
     name: "",
     maxCameras: 5
@@ -71,6 +78,15 @@ export default function OrganizationsPage() {
     id: 0,
     name: "",
     maxCameras: 5
+  });
+  const [newAdminData, setNewAdminData] = useState({
+    organizationId: 0,
+    organizationName: "",
+    username: "",
+    name: "",
+    email: "",
+    password: "",
+    confirmPassword: ""
   });
 
   // Server URL from environment
@@ -126,6 +142,12 @@ export default function OrganizationsPage() {
     } else {
       setNewOrgData(prev => ({ ...prev, [name]: setValue }));
     }
+  };
+
+  // Handle input change for new admin form
+  const handleAdminInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setNewAdminData(prev => ({ ...prev, [name]: value }));
   };
 
   // Handle create organization
@@ -195,6 +217,20 @@ export default function OrganizationsPage() {
     setIsEditDialogOpen(true);
   };
 
+  // Open add admin dialog with organization data
+  const handleAddAdminClick = (org: Organization) => {
+    setNewAdminData({
+      organizationId: org.id,
+      organizationName: org.name,
+      username: "",
+      name: "",
+      email: "",
+      password: "",
+      confirmPassword: ""
+    });
+    setIsAddAdminDialogOpen(true);
+  };
+
   // Handle update organization
   const handleUpdateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -244,6 +280,90 @@ export default function OrganizationsPage() {
     } catch (err) {
       console.error('Error updating organization:', err);
       toast.error(err instanceof Error ? err.message : 'Failed to update organization');
+    }
+  };
+
+  // Handle create admin
+  const handleCreateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!session?.accessToken) {
+      toast.error('You must be logged in to perform this action');
+      return;
+    }
+    
+    // Validate form
+    if (!newAdminData.username.trim()) {
+      toast.error('Username is required');
+      return;
+    }
+    
+    if (!newAdminData.name.trim()) {
+      toast.error('Name is required');
+      return;
+    }
+    
+    if (!newAdminData.email.trim()) {
+      toast.error('Email is required');
+      return;
+    }
+    
+    if (!newAdminData.password) {
+      toast.error('Password is required');
+      return;
+    }
+    
+    if (newAdminData.password !== newAdminData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+    
+    try {
+      const result = await addOrganizationAdmin(
+        newAdminData.organizationId,
+        {
+          username: newAdminData.username.trim(),
+          name: newAdminData.name.trim(),
+          email: newAdminData.email.trim(),
+          password: newAdminData.password
+        },
+        session.accessToken
+      );
+      
+      // Update the organization's admin list
+      setOrganizations(prev => 
+        prev.map(org => {
+          if (org.id === newAdminData.organizationId) {
+            const newAdmin = {
+              id: result.admin.id,
+              name: newAdminData.name,
+              email: newAdminData.email
+            };
+            
+            return {
+              ...org,
+              admins: [...org.admins, newAdmin]
+            };
+          }
+          return org;
+        })
+      );
+      
+      // Reset form and close dialog
+      setNewAdminData({
+        organizationId: 0,
+        organizationName: "",
+        username: "",
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: ""
+      });
+      setIsAddAdminDialogOpen(false);
+      toast.success('Admin created successfully');
+    } catch (err) {
+      console.error('Error creating admin:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to create admin');
     }
   };
 
@@ -342,15 +462,28 @@ export default function OrganizationsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    className="h-8 w-8 p-0"
-                    onClick={() => handleEditClick(org)}
-                  >
-                    <IconSettings size={16} />
-                    <span className="sr-only">Settings</span>
-                  </Button>
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleAddAdminClick(org)}
+                      title="Add Admin"
+                    >
+                      <IconUserPlus size={16} />
+                      <span className="sr-only">Add Admin</span>
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={() => handleEditClick(org)}
+                      title="Edit Organization"
+                    >
+                      <IconSettings size={16} />
+                      <span className="sr-only">Edit</span>
+                    </Button>
+                  </div>
                 </TableCell>
               </TableRow>
             ))}
@@ -455,6 +588,101 @@ export default function OrganizationsPage() {
                 Cancel
               </Button>
               <Button type="submit">Update Organization</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Add Admin Dialog */}
+      <Dialog open={isAddAdminDialogOpen} onOpenChange={setIsAddAdminDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add Organization Admin</DialogTitle>
+            <DialogDescription>
+              Create a new admin for {newAdminData.organizationName}.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateAdmin}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="username" className="text-right font-medium col-span-1">
+                  Username
+                </label>
+                <Input
+                  id="username"
+                  name="username"
+                  value={newAdminData.username}
+                  onChange={handleAdminInputChange}
+                  className="col-span-3"
+                  placeholder="Username for login"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="admin-name" className="text-right font-medium col-span-1">
+                  Full Name
+                </label>
+                <Input
+                  id="admin-name"
+                  name="name"
+                  value={newAdminData.name}
+                  onChange={handleAdminInputChange}
+                  className="col-span-3"
+                  placeholder="Full name"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="email" className="text-right font-medium col-span-1">
+                  Email
+                </label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={newAdminData.email}
+                  onChange={handleAdminInputChange}
+                  className="col-span-3"
+                  placeholder="Email address"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="password" className="text-right font-medium col-span-1">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={newAdminData.password}
+                  onChange={handleAdminInputChange}
+                  className="col-span-3"
+                  placeholder="Create password"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="confirmPassword" className="text-right font-medium col-span-1">
+                  Confirm
+                </label>
+                <Input
+                  id="confirmPassword"
+                  name="confirmPassword"
+                  type="password"
+                  value={newAdminData.confirmPassword}
+                  onChange={handleAdminInputChange}
+                  className="col-span-3"
+                  placeholder="Confirm password"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAddAdminDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Admin</Button>
             </DialogFooter>
           </form>
         </DialogContent>
