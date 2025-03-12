@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
-import { AuthProvider } from "@/context/authContext";
+import AuthProvider from "@/app/providers";
 import { Toaster } from "@/components/ui/sonner";
 
 

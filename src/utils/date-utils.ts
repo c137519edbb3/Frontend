@@ -12,3 +12,17 @@ export const formatTimestamp = (timestamp: string) => {
       hour12: true
     });
   };
+
+
+export const formatDate = (dateString: string): string => {
+  if (!dateString) return 'N/A';
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return 'Invalid date';
+  
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};

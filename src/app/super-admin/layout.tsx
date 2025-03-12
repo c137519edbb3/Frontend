@@ -25,41 +25,7 @@ const links = [
       <IconBuildingSkyscraper className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
     ),
   },
-  {
-    label: "Users",
-    href: "/super-admin/users",
-    icon: (
-      <IconUsers className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Admin Management",
-    href: "/super-admin/admins",
-    icon: (
-      <IconUserShield className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Reports",
-    href: "/super-admin/reports",
-    icon: (
-      <IconFileText className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Analytics",
-    href: "/super-admin/analytics",
-    icon: (
-      <IconReportAnalytics className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
-  {
-    label: "Settings",
-    href: "/super-admin/settings",
-    icon: (
-      <IconSettings className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
-    ),
-  },
+  // Other menu items...
 ];
 
 export default function SuperAdminLayout({
