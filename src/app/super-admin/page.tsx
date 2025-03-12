@@ -1,26 +1,29 @@
 "use client";
+import { RouteGuard } from "@/components/auth/RouteGuard";
 import { BentoGrid, BentoGridItem } from "@/components/ui/bento-grid";
 import VideoPlayer from "@/components/VideoPlayer"; // Import your VideoPlayer component
 
 function Dashboard() {
   return (
-    <div>
+    <RouteGuard allowedRoles={['Admin']}>
       <div>
-        <h1 className="mx-auto text-4xl">Eyecon AI</h1>
+        <div>
+          <h1 className="mx-auto text-4xl">Eyecon AI</h1>
+        </div>
+      <BentoGrid className="max-w-4xl mx-auto ml-8 mt-4">
+        {items.map((item, i) => (
+          <BentoGridItem
+            key={i}
+            title={item.title}
+            // description={item.description}
+            header={item.header} // Render the video player here
+            // icon={item.icon}
+            className="bg-gray-50"
+          />
+        ))}
+      </BentoGrid>
       </div>
-    <BentoGrid className="max-w-4xl mx-auto ml-8 mt-4">
-      {items.map((item, i) => (
-        <BentoGridItem
-          key={i}
-          title={item.title}
-          // description={item.description}
-          header={item.header} // Render the video player here
-          // icon={item.icon}
-          className="bg-gray-50"
-        />
-      ))}
-    </BentoGrid>
-    </div>
+    </RouteGuard>
   );
 }
 

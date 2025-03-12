@@ -7,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 import { Cloud, CreditCard, Github, Keyboard, LifeBuoy, LogOut, Mail, MessageSquare, Plus, PlusCircle, SearchIcon, Settings, Shell, User, UserPlus, Users } from 'lucide-react';
 import { CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '../ui/command';
 import { signOut, useSession } from 'next-auth/react';
-
+import { TOKEN_KEY } from '@/utils/auth-utils';
 
 const Header: React.FC<HeaderProps> = ({ pageName, userName, userEmail }) => {
     const [open, setOpen] = React.useState(false);
@@ -117,7 +117,7 @@ interface UserProps {
   }
 
   const handleLogout = () => {
-    localStorage.removeItem("access_token");
+    localStorage.removeItem(TOKEN_KEY);
     signOut({ callbackUrl: "/auth/login" });
   };
   

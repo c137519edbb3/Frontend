@@ -61,6 +61,7 @@ import Header from '@/components/common/navbar';
 import { useSession } from 'next-auth/react';
 import Loading from '@/components/common/Loading';
 import { AnomalyLog, subscribeToAnomalyLogs } from '@/services/firebaseService';
+import { RouteGuard } from '@/components/auth/RouteGuard';
 
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL_AWS;
 
@@ -552,38 +553,40 @@ export default function Dashboard() {
 
   // 5. Render dashboard
   return (
-    <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
-      <Header pageName="Dashboard" userName="John Doe" userEmail="6oFkI@example.com" />
+    <RouteGuard allowedRoles={['Organization Admin']}>
+      <div className="flex flex-col gap-6 p-4 pr-20 bg-background min-h-screen w-full">
+        <Header pageName="Dashboard" userName="John Doe" userEmail="6oFkI@example.com" />
 
-      <Tabs defaultValue="overview" className="w-full">
-        <TabsList className="bg-secondary">
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-        </TabsList>
-      </Tabs>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="bg-secondary">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="reports">Reports</TabsTrigger>
+            <TabsTrigger value="notifications">Notifications</TabsTrigger>
+          </TabsList>
+        </Tabs>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-4">
-        <Card className="bg-secondary  text-neutral-400  ">
-          <CardHeader>
-            <CardTitle className='text-neutral-800'>Live Anomaly Tracking</CardTitle>
-            <TableDemo />
-          </CardHeader>
-        </Card>
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-4">
+          <Card className="bg-secondary  text-neutral-400  ">
+            <CardHeader>
+              <CardTitle className='text-neutral-800'>Live Anomaly Tracking</CardTitle>
+              <TableDemo />
+            </CardHeader>
+          </Card>
 
-        <Card className="bg-secondary ">
-          <CardHeader>
-            <CardTitle>Active Cameras</CardTitle>
-            <CameraDetailsGrid/>
-          </CardHeader>
-        </Card>
+          <Card className="bg-secondary ">
+            <CardHeader>
+              <CardTitle>Active Cameras</CardTitle>
+              <CameraDetailsGrid/>
+            </CardHeader>
+          </Card>
+
+        </div>
+        <div>
+          <Component/>
+        </div>
 
       </div>
-      <div>
-        <Component/>
-      </div>
-
-    </div>
+    </RouteGuard>
   );
 }

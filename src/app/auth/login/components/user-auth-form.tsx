@@ -13,6 +13,7 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { loginUser } from "@/utils/auth-api"
 import { useAuth } from "@/context/authContext"
+import { getRedirectPath } from "@/utils/auth-utils";
  
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -31,30 +32,39 @@ export function UserAuthForm({ className, ...props }: UserAuthFormProps) {
     setIsLoading(true)
 
     try {
+      // First get the token from your API
       const response = await loginUser(credentials.username, credentials.password);
 
-      if (response.token){
+      if (response.token) {
+        // Store the token in your auth context
         login(response.token);
-      }
+        
+        // Get the appropriate redirect path based on user role in the token
+        const redirectPath = getRedirectPath();
+        
+        // Use Next Auth for session management
+        const result = await signIn('credentials', {
+          redirect: false,
+          username: credentials.username,
+          password: credentials.password,
+          callbackUrl: redirectPath, // Use the role-based redirect path instead of hardcoded '/admin'
+        });
 
-      const result = await signIn('credentials', {
-        redirect: false,
-        username: credentials.username,
-        password: credentials.password,
-        callbackUrl: '/admin',
-      });
-
-      if (result?.error) {
-        console.log("signIn error:", result.error);
-        setError(result.error)
-        setIsLoading(false)
-        return
-      } 
-      
-      if (result?.url) {
-        router.push(result.url); // Redirect to the URL returned by NextAuth
+        if (result?.error) {
+          console.log("signIn error:", result.error);
+          setError(result.error)
+          setIsLoading(false)
+          return
+        } 
+        
+        if (result?.url) {
+          router.push(redirectPath); // Use our determined redirectPath instead of result.url
+        } else {
+          setError("Login failed. Please try again.");
+          setIsLoading(false);
+        }
       } else {
-        setError("Login failed. Please try again.");
+        setError("Invalid credentials");
         setIsLoading(false);
       }
     } catch (err: any) {

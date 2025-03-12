@@ -8,6 +8,9 @@ import { UserAuthForm } from "./components/user-auth-form"
 import { Suspense } from "react"
 import { useSession } from "next-auth/react"
 import Loading from "@/components/common/Loading"
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { getRedirectPath, TOKEN_KEY } from '@/utils/auth-utils';
 
 
 
