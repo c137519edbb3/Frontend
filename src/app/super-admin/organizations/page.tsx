@@ -24,6 +24,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { IconPlus, IconSettings, IconUser, IconCamera } from "@tabler/icons-react";
 import { toast } from "sonner";
+import { updateOrganization } from "@/utils/organization-api";
 
 // Types
 interface Organization {
@@ -60,8 +61,14 @@ export default function OrganizationsPage() {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [newOrgData, setNewOrgData] = useState({
+    name: "",
+    maxCameras: 5
+  });
+  const [editOrgData, setEditOrgData] = useState({
+    id: 0,
     name: "",
     maxCameras: 5
   });
@@ -110,12 +117,15 @@ export default function OrganizationsPage() {
   };
 
   // Handle input change for new organization form
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
     const { name, value } = e.target;
-    setNewOrgData(prev => ({
-      ...prev,
-      [name]: name === 'maxCameras' ? parseInt(value, 10) || 1 : value
-    }));
+    const setValue = name === 'maxCameras' ? parseInt(value, 10) || 1 : value;
+    
+    if (isEdit) {
+      setEditOrgData(prev => ({ ...prev, [name]: setValue }));
+    } else {
+      setNewOrgData(prev => ({ ...prev, [name]: setValue }));
+    }
   };
 
   // Handle create organization
@@ -167,11 +177,73 @@ export default function OrganizationsPage() {
       
       setOrganizations(prev => [...prev, newOrg]);
       setNewOrgData({ name: "", maxCameras: 5 });
-      setIsDialogOpen(false);
+      setIsCreateDialogOpen(false);
       toast.success('Organization created successfully');
     } catch (err) {
       console.error('Error creating organization:', err);
       toast.error(err instanceof Error ? err.message : 'Failed to create organization');
+    }
+  };
+
+  // Open edit dialog with organization data
+  const handleEditClick = (org: Organization) => {
+    setEditOrgData({
+      id: org.id,
+      name: org.name,
+      maxCameras: org.maxCameras
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  // Handle update organization
+  const handleUpdateOrg = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!session?.accessToken) {
+      toast.error('You must be logged in to perform this action');
+      return;
+    }
+    
+    if (!editOrgData.name.trim()) {
+      toast.error('Organization name is required');
+      return;
+    }
+    
+    if (editOrgData.maxCameras < 1) {
+      toast.error('Maximum cameras must be at least 1');
+      return;
+    }
+    
+    try {
+      const result = await updateOrganization(
+        editOrgData.id,
+        {
+          name: editOrgData.name.trim(),
+          maxCameras: editOrgData.maxCameras
+        },
+        session.accessToken
+      );
+      
+      // Update the organizations list
+      setOrganizations(prev => 
+        prev.map(org => 
+          org.id === editOrgData.id 
+            ? { 
+                ...org, 
+                name: editOrgData.name, 
+                maxCameras: editOrgData.maxCameras,
+                // Recalculate usage percentage
+                usagePercentage: Math.round((org.cameraCount / editOrgData.maxCameras) * 100)
+              } 
+            : org
+        )
+      );
+      
+      setIsEditDialogOpen(false);
+      toast.success('Organization updated successfully');
+    } catch (err) {
+      console.error('Error updating organization:', err);
+      toast.error(err instanceof Error ? err.message : 'Failed to update organization');
     }
   };
 
@@ -194,7 +266,7 @@ export default function OrganizationsPage() {
       
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Organizations</h2>
-        <Button onClick={() => setIsDialogOpen(true)} className="flex items-center gap-2">
+        <Button onClick={() => setIsCreateDialogOpen(true)} className="flex items-center gap-2">
           <IconPlus size={18} />
           Add Organization
         </Button>
@@ -214,7 +286,7 @@ export default function OrganizationsPage() {
         <Card>
           <CardContent className="flex flex-col items-center justify-center h-64 p-6">
             <p className="text-muted-foreground mb-4">No organizations found</p>
-            <Button onClick={() => setIsDialogOpen(true)}>Create Organization</Button>
+            <Button onClick={() => setIsCreateDialogOpen(true)}>Create Organization</Button>
           </CardContent>
         </Card>
       ) : (
@@ -270,7 +342,12 @@ export default function OrganizationsPage() {
                   </div>
                 </TableCell>
                 <TableCell className="text-right">
-                  <Button variant="outline" size="sm" className="h-8 w-8 p-0">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="h-8 w-8 p-0"
+                    onClick={() => handleEditClick(org)}
+                  >
                     <IconSettings size={16} />
                     <span className="sr-only">Settings</span>
                   </Button>
@@ -282,7 +359,7 @@ export default function OrganizationsPage() {
       )}
       
       {/* Create Organization Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Create New Organization</DialogTitle>
@@ -300,7 +377,7 @@ export default function OrganizationsPage() {
                   id="name"
                   name="name"
                   value={newOrgData.name}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e)}
                   className="col-span-3"
                   placeholder="Organization name"
                   required
@@ -316,17 +393,68 @@ export default function OrganizationsPage() {
                   type="number"
                   min="1"
                   value={newOrgData.maxCameras}
-                  onChange={handleInputChange}
+                  onChange={(e) => handleInputChange(e)}
                   className="col-span-3"
                   required
                 />
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+              <Button type="button" variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancel
               </Button>
               <Button type="submit">Create Organization</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Organization Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Organization</DialogTitle>
+            <DialogDescription>
+              Update organization details.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateOrg}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-name" className="text-right font-medium col-span-1">
+                  Name
+                </label>
+                <Input
+                  id="edit-name"
+                  name="name"
+                  value={editOrgData.name}
+                  onChange={(e) => handleInputChange(e, true)}
+                  className="col-span-3"
+                  placeholder="Organization name"
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label htmlFor="edit-maxCameras" className="text-right font-medium col-span-1">
+                  Max Cameras
+                </label>
+                <Input
+                  id="edit-maxCameras"
+                  name="maxCameras"
+                  type="number"
+                  min="1"
+                  value={editOrgData.maxCameras}
+                  onChange={(e) => handleInputChange(e, true)}
+                  className="col-span-3"
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">Update Organization</Button>
             </DialogFooter>
           </form>
         </DialogContent>
