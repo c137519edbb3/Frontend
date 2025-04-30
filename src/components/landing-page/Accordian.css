@@ -1,0 +1,39 @@
+.faq-item {
+    background-color: #f3f4f6; /* Grey background */
+    border-radius: 0.5rem; /* Rounded corners */
+    padding: 0.5rem; /* Reduced padding for less height */
+    transition: border-color 0.3s ease; /* Smooth transition for border */
+  }
+  
+  .faq-item button {
+    font-size: 1rem; /* Slightly smaller font size */
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0; /* Remove padding */
+  }
+  
+  .faq-item:hover {
+    border-color: transparent; /* Remove border color on hover */
+  }
+  
+  .faq-item div {
+    margin-top: 0.5rem;
+    color: #6b7280; /* Grey text */
+  }
+  
+  svg {
+    width: 24px;
+    height: 24px;
+    fill: none;
+    stroke: black; /* Icon stroke set to black */
+  }
+  
+  /* Add transition for height and opacity */
+  .transition-all {
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  }
+  
