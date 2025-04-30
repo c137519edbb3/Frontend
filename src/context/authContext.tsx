@@ -33,7 +33,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
-        if (pathname !== "/auth/login") {
+        // Add the landing page to the exception list
+        if (pathname !== "/auth/login" && pathname !== "/landing") {
           router.push("/auth/login");
         }
       }
