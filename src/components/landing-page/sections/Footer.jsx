@@ -17,7 +17,7 @@ const Footer = () => {
         <div className="footer-section">
           <h4>Contact Us</h4>
           <ul>
-            <li>info@syslab.ai</li>
+            <li>info@eyeconai.com</li>
             <li>Room 1, Academic Block 3 FAST- National University of Computer Emerging Sciences ST-4, Sector 17-D, Shah Latif Town On National Highway Karachi</li>
           </ul>
         </div>
@@ -35,7 +35,7 @@ const Footer = () => {
         <ul>
           <li>
 
-        Eyecon AI All right reserved. ©2024
+        Eyecon AI All rights reserved. ©{new Date().getFullYear()}
           </li>
         </ul>
       </div>
