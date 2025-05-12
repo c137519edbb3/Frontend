@@ -4,17 +4,54 @@
   position: relative;
 }
 
+/* Text enhancement styles */
+.hero-heading {
+  text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.hero-heading span {
+  text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+
+.hero-description {
+  text-shadow: 0 1px 1px rgba(0,0,0,0.05);
+}
+
+/* Add a subtle backdrop for text if needed */
+.text-backdrop {
+  position: relative;
+}
+
+.text-backdrop::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(8px);
+}
+
 .scrolling-images {
   display: flex;
-  animation: scroll 10s linear infinite;
+  animation: scroll 25s linear infinite;
 }
 
 .scrolling-image {
   width: auto;
-  height: 50px;
-  margin: 0 10px;
-  filter: grayscale(100%) brightness(0);
-  transition: filter 0.3s ease, box-shadow 0.3s ease;
+  height: 40px;
+  margin: 0 30px;
+  filter: grayscale(100%) brightness(0.7);
+  opacity: 0.7;
+  transition: filter 0.3s ease, opacity 0.3s ease;
+}
+
+.scrolling-image:hover {
+  filter: grayscale(0) brightness(1);
+  opacity: 1;
 }
 
 @keyframes scroll {
@@ -45,4 +82,39 @@
 .scroll-container::after {
   right: 0;
   background: linear-gradient(to left, white, transparent);
+}
+
+/* Pulse animation for anomaly alert */
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0.7);
+  }
+  
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(255, 82, 82, 0);
+  }
+  
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(255, 82, 82, 0);
+  }
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .scrolling-image {
+    height: 30px;
+    margin: 0 20px;
+  }
+  
+  .scroll-container::before,
+  .scroll-container::after {
+    width: 60px;
+  }
 }

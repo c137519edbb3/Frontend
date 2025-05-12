@@ -11,14 +11,13 @@ import Team from '@/components/landing-page/sections/Team';
 import FAQ from '@/components/landing-page/sections/FAQ';
 import BookDemo from '@/components/landing-page/sections/BookDemo';
 import Footer from '@/components/landing-page/sections/Footer';
-import PurpleLogo from '@/components/landing-page/sections/PurpleLogo';
 
 export default function LandingPage() {
   return (
     <div className="landing-page relative min-h-screen flex flex-col items-center justify-center">
       {/* Fluid Background */}
       <div 
-        className="absolute top-[300px] left-0 right-0 bottom-0 bg-no-repeat bg-cover opacity-80 z-[2] pointer-events-none"
+        className="absolute top-[300px] left-0 right-0 bottom-0 bg-no-repeat bg-cover opacity-80 z-[1] pointer-events-none"
         style={{ 
           backgroundImage: "url('/images/fluid_bg_1.avif')",
           backgroundSize: "100% auto",
@@ -58,12 +57,11 @@ export default function LandingPage() {
       
       {/* Content */}
       <div className="relative z-[2] w-full flex flex-col items-center">
-        <PurpleLogo />
         <Hero />
-<Methodology />
+        <Methodology />
         <WhyChooseUs />
         <WhoFor />
-<Team />
+        <Team />
         <FAQ />
         <BookDemo />
         <Footer />
