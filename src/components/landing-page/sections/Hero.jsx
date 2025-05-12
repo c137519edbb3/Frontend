@@ -39,9 +39,8 @@ const Hero = () => {
     }
   }, [controls, isInView]);
 
-  return (
-    <div className="w-full min-h-[90vh] flex items-center justify-center" ref={ref}>
-      <div className="w-full max-w-7xl mx-auto px-4 py-8 md:py-12 lg:py-16">
+  return (    <div className="w-full min-h-[90vh] flex items-center justify-center bg-transparent" ref={ref}>
+      <div className="w-full max-w-7xl mx-auto px-4 py-8 md:py-12 lg:py-16 bg-transparent">
         <div className="flex flex-col lg:flex-row items-center gap-12">
             {/* Left Content */}
           <div className="w-full lg:w-1/2 space-y-8 relative">
@@ -171,18 +170,16 @@ const Hero = () => {
           />
         </motion.div>
         
-        {/* Partner Logos */}
-        <motion.div 
+        {/* Partner Logos */}        <motion.div 
           initial={{ opacity: 0 }}
           animate={controls}
           variants={{
             visible: { opacity: 1, transition: { duration: 1, delay: 0.8 } }
           }}
-          className="mt-16"
+          className="mt-16 bg-transparent"
         >
-          <p className="text-center text-sm text-gray-500 mb-6">Trusted by leading organizations</p>
-          <div className="flex flex-col items-center overflow-hidden">
-            <div className="scroll-container">
+          <p className="text-center text-sm text-gray-500 mb-6">Trusted by leading organizations</p>          <div className="flex flex-col items-center overflow-hidden bg-transparent">
+            <div className="scroll-container bg-transparent">
               <ScrollingImageList images={images} />
             </div>
           </div>
@@ -194,16 +191,9 @@ const Hero = () => {
 export default Hero;
 
 const ScrollingImageList = ({ images }) => {
-  return (
-    <div className="flex flex-col items-center overflow-hidden">
-       {/* Left shadow overlay */}
-       <div className="absolute top-0 left-0 bottom-0 w-64 bg-gradient-to-r from-white to-transparent pointer-events-none z-10" />
-        
-        {/* Right shadow overlay */}
-        <div className="absolute top-0 right-0 bottom-0 w-64 bg-gradient-to-l from-white to-transparent pointer-events-none z-10" />
-
-      <div className="scroll-container">
-        <div className="scrolling-images">
+  return (    <div className="flex flex-col items-center overflow-hidden bg-transparent">
+       {/* Left and right shadow overlays removed for transparency */}      <div className="scroll-container bg-transparent">
+        <div className="scrolling-images bg-transparent">
           {images.map((image, index) => (
             <img
               key={index}

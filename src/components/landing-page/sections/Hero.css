@@ -2,6 +2,7 @@
   width: 100%;
   overflow: hidden;
   position: relative;
+  background: transparent;
 }
 
 /* Text enhancement styles */
@@ -38,6 +39,7 @@
 .scrolling-images {
   display: flex;
   animation: scroll 25s linear infinite;
+  background: transparent;
 }
 
 .scrolling-image {
@@ -76,12 +78,12 @@
 
 .scroll-container::before {
   left: 0;
-  background: linear-gradient(to right, white, transparent);
+  background: linear-gradient(to right, transparent, transparent);
 }
 
 .scroll-container::after {
   right: 0;
-  background: linear-gradient(to left, white, transparent);
+  background: linear-gradient(to left, transparent, transparent);
 }
 
 /* Pulse animation for anomaly alert */
