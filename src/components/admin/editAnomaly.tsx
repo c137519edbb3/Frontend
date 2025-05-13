@@ -25,6 +25,12 @@ import { Checkbox } from "../ui/checkbox";
 import { dayCodeMap } from "@/constants/config";
 import { AnomalyRequest } from "@/types/anomaly-request";
 import { updateAnomaly } from "@/utils/anomaly-api";
+import { Anomaly as BaseAnomaly } from "@/types/anomalies";
+
+// Extended Anomaly interface to include cameras array
+interface Anomaly extends BaseAnomaly {
+  cameras: string[];
+}
 
 interface AnomalyFormProps {
   cameraOptions: Array<{ label: string; value: string }>;
@@ -41,62 +47,126 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({
   accessToken,
   onSave,
 }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [anomaly, setAnomaly] = useState<Anomaly>({
-    id: Date.now(),
+  const [isOpen, setIsOpen] = useState(false);  const [anomaly, setAnomaly] = useState<Anomaly>({
+    anomalyId: Date.now(),
     title: "",
     description: "",
     cameras: [],
-    scheduledTime: { start: "", end: "" },
+    startTime: "",
+    endTime: "",
     criticality: "Moderate",
-    weekdays: [],
+    daysOfWeek: [],
+    status: "",
+    organizationId: 0,
+    createdAt: "",
+    updatedAt: "",
+    modelName: "",
+    Cameras: []
   });
   useEffect(() => {
     console.log("Props passed to EditAnomalyFormDialog:", {
       cameraOptions,
       initialAnomaly,
     });
-  }, [cameraOptions, initialAnomaly]);
-
-  useEffect(() => {
+  }, [cameraOptions, initialAnomaly]);  useEffect(() => {
     if (initialAnomaly) {
-      setAnomaly(initialAnomaly);
+      console.log("Initial anomaly received:", JSON.stringify(initialAnomaly, null, 2));
+      
+      // Format time fields for display (HH:MM)
+      const formatTimeForInput = (timeString: string) => {
+        if (!timeString) return "";
+        // If the time includes seconds, remove them for the input field
+        if (timeString.split(':').length === 3) {
+          return timeString.substring(0, 5); // Take only HH:MM part
+        }
+        return timeString;
+      };
+      
+      // Create a mapped version of the anomaly with correctly formatted fields
+      const mappedAnomaly = {
+        ...initialAnomaly,
+        startTime: formatTimeForInput(initialAnomaly.startTime),
+        endTime: formatTimeForInput(initialAnomaly.endTime),
+        // Ensure cameras array is properly mapped from Cameras objects if needed
+        cameras: initialAnomaly.cameras || 
+                 (initialAnomaly.Cameras?.map(c => c.cameraId.toString()) || [])
+      };
+      
+      console.log("Mapped anomaly for form:", mappedAnomaly);
+      setAnomaly(mappedAnomaly);
     }
-  }, [initialAnomaly]);
-
-  const handleSave = async () => {
+  }, [initialAnomaly]);  const handleSave = async () => {
     try {
+      // Format time to ensure it has seconds (HH:MM:SS)
+      const formatTimeWithSeconds = (timeString: string) => {
+        if (!timeString) return "";
+        // If time already has seconds part, return as is
+        if (timeString.split(':').length === 3) return timeString;
+        // Otherwise add :00 for seconds
+        return `${timeString}:00`;
+      };
+
+      // Save the time values we're trying to update
+      const updatedStartTime = formatTimeWithSeconds(anomaly.startTime);
+      const updatedEndTime = formatTimeWithSeconds(anomaly.endTime);
+      
+      console.log(`Updating times: startTime=${updatedStartTime}, endTime=${updatedEndTime}`);
+
+      // Create the API request
       const anomalyRequest: AnomalyRequest = {
         title: anomaly.title,
         description: anomaly.description,
         criticality: anomaly.criticality,
-        modelName: anomaly.modelName,
-        cameraIds: anomaly.cameras.map(id => parseInt(id))
-        // startTime: anomaly.startTime,
-        // endTime: anomaly.endTime,
-        // daysOfWeek: anomaly.daysOfWeek
+        modelName: anomaly.modelName || "",
+        cameraIds: anomaly.cameras.map(id => parseInt(id)),
+        startTime: updatedStartTime,
+        endTime: updatedEndTime,
+        daysOfWeek: anomaly.daysOfWeek || []
       };
 
-      const updatedAnomaly = await updateAnomaly(
+      console.log("Sending update request:", JSON.stringify(anomalyRequest, null, 2));
+
+      // Send the update to the API
+      const serverResponse = await updateAnomaly(
         organizationId,
         anomaly.anomalyId,
         anomalyRequest,
         accessToken
       );
-
-      onSave(updatedAnomaly);
+      
+      console.log("Server response:", JSON.stringify(serverResponse, null, 2));
+      
+      // Create a merged object that preserves our updated time values
+      // This ensures the UI reflects our changes even if the server doesn't return them
+      const mergedAnomaly: Anomaly = {
+        ...serverResponse,
+        startTime: updatedStartTime,
+        endTime: updatedEndTime,
+        cameras: anomaly.cameras // Preserve camera selections
+      };
+      
+      console.log("Merged anomaly passing to parent:", JSON.stringify(mergedAnomaly, null, 2));
+        // Pass the merged object to the parent component
+      onSave(mergedAnomaly);
       setIsOpen(false);
     } catch (error) {
       console.error('Error updating anomaly:', error);
       // Add error notification here
     }
-  };
-
-  const handleChange = (field: keyof Anomaly, value: any) => {
+  };const handleChange = (field: keyof Anomaly, value: string | string[]) => {
+    console.log(`Changing field: ${field} to value:`, value);
+    
     if (field === 'daysOfWeek') {
       setAnomaly((prev) => ({
         ...prev,
         daysOfWeek: Array.isArray(value) ? value : prev.daysOfWeek
+      }));
+    } else if (field === 'startTime' || field === 'endTime') {
+      // Log time changes specifically
+      console.log(`Updating ${field} from ${anomaly[field]} to ${value}`);
+      setAnomaly((prev) => ({
+        ...prev,
+        [field]: value,
       }));
     } else {
       setAnomaly((prev) => ({
@@ -167,39 +237,29 @@ const EditAnomalyFormDialog: React.FC<AnomalyFormProps> = ({
               value={anomaly.cameras}
               onValueChange={(value) => handleChange("cameras", value)}
             />
-          </div>
-
-          <div className="grid grid-cols-4 items-center gap-4">
+          </div>          <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="anomaly-start-time" className="text-right">
               Start time
             </Label>
             <Input
               id="anomaly-start-time"
               type="time"
-              value={anomaly.startTime}
-              onChange={(e) =>
-                handleChange("scheduledTime", {
-                  ...anomaly.scheduledTime,
-                  start: e.target.value,
-                })
-              }
+              value={anomaly.startTime || ""}
+              className="col-span-3"
+              onChange={(e) => handleChange("startTime", e.target.value)}
             />
           </div>
 
           <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="end time" className="text-right">
+            <Label htmlFor="anomaly-end-time" className="text-right">
               End time
             </Label>
             <Input
               id="anomaly-end-time"
               type="time"
-              value={anomaly.endTime}
-              onChange={(e) =>
-                handleChange("scheduledTime", {
-                  ...anomaly.scheduledTime,
-                  end: e.target.value,
-                })
-              }
+              value={anomaly.endTime || ""}
+              className="col-span-3"
+              onChange={(e) => handleChange("endTime", e.target.value)}
             />
           </div>
 
