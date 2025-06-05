@@ -375,7 +375,7 @@ function Anomalies() {
                       className={cn(
                         "p-4 rounded cursor-pointer transition-colors",
                         selectedAnomalyLog?.logId === log.logId
-                          ? "bg-primary text-primary-foreground"
+                          ? "bg-p bg-opacity-55"
                           : "bg-secondary hover:bg-secondary/80"
                       )}
                       onClick={() => setSelectedAnomalyLog(log)}

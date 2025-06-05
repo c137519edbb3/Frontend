@@ -1,10 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import SectionComponent from '../SectionComponent';
 
 const WhoFor = () => {
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
       <SectionComponent 
         text="User" 
         heading="Who Is This For?" 
@@ -12,7 +16,7 @@ const WhoFor = () => {
       >
         <VerticalSlidingCards /> 
       </SectionComponent>
-    </div>
+    </motion.div>
   );
 };
 const items = [
@@ -82,7 +86,7 @@ const items = [
 
 const VerticalSlidingCards = () => {
   const itemsPerColumn = Math.ceil(items.length / 3);
-  const itemHeight = 160; // Reduced from 220px to 160px
+  const itemHeight = 160;
   const columnHeight = itemsPerColumn * itemHeight;
   const totalHeight = columnHeight * 3;
 
@@ -98,13 +102,10 @@ const VerticalSlidingCards = () => {
 
     const speed = 0.5;
 
-
-
-    // my-2 = 8px
     const animate = () => {
       setTranslateY1(prev => {
         const newY = prev - speed;
-        return newY <= itemHeight/4 + 8 ? columnHeight  : newY;
+        return newY <= itemHeight/4 + 8 ? columnHeight : newY;
       });
       setTranslateY2(prev => {
         const newY = prev + speed;
@@ -129,34 +130,43 @@ const VerticalSlidingCards = () => {
     return repeatedItems.map((item, index) => (
       <motion.div 
         key={`${startIndex}-${index}`}
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: index * 0.1 }}
+        whileHover={{ scale: 1.02 }}
         className="w-full h-[140px] flex-shrink-0 relative overflow-hidden my-2 rounded-lg"
         style={{
           backgroundImage: `url(${item.imageUrl})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          filter: 'brightness(1.3) contrast(0.9)', // Increase brightness by 30%
-          border: '1px solid gray' // 1px gray border
+          filter: 'brightness(1.3) contrast(0.9)',
+          border: '1px solid gray'
         }}
       >
-        {/* Inner shadow overlay */}
-        <div 
-          className="absolute inset-0 bg-gradient-to-b from-black/10 via-black/20 to-black/90" 
-        />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/50 to-black/90" />
 
-        {/* Content container */}
-        <div className="absolute inset-0 flex flex-col justify-end items-center p-2 text-white">
-          <h3 className="text-m mb-1 text-center text-white">{item.title}</h3>
-          <p className="text-xs text-center text-white">{item.description}</p>
-        </div>
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.2 }}
+          className="absolute inset-0 flex flex-col justify-end items-center text-white"
+        >
+          <h3 className="text-m mb-1 text-center text-gray-100">{item.title}</h3>
+          <p className="text-xs text-center text-gray-300">{item.description}</p>
+        </motion.div>
       </motion.div>
-
     ));
   };
 
   return (
-    <div className="flex justify-center items-center bg-transparent p-4">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="flex justify-center items-center bg-transparent"
+    >
       <div
-        className="relative w-[720px] h-[480px] overflow-hidden bg-transparent rounded-lg"
+        className="relative w-[90vw] md:w-[66vw] lg:w-[66vw] xl:w-[66vw] h-[480px] overflow-hidden bg-transparent rounded-lg"
         style={{
           boxShadow: 'inset 0 10px 10px -10px rgba(255,255,255,1), inset 0 -10px 10px -10px rgba(255,255,255,1)'
         }}
@@ -165,27 +175,27 @@ const VerticalSlidingCards = () => {
         <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
 
         <div ref={containerRef} className="absolute top-0 left-0 right-0 flex">
-          <div 
+          <motion.div 
             className="w-1/3 px-2" 
             style={{ transform: `translateY(${-translateY1}px)` }}
           >
             {createColumn(0, itemsPerColumn)}
-          </div>
-          <div 
+          </motion.div>
+          <motion.div 
             className="w-1/3 px-2" 
             style={{ transform: `translateY(${-translateY2}px)` }}
           >
             {createColumn(itemsPerColumn, 2 * itemsPerColumn)}
-          </div>
-          <div 
+          </motion.div>
+          <motion.div 
             className="w-1/3 px-2" 
             style={{ transform: `translateY(${-translateY3}px)` }}
           >
             {createColumn(2 * itemsPerColumn, 3 * itemsPerColumn)}
-          </div>
+          </motion.div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

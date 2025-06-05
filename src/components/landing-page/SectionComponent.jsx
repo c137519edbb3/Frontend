@@ -2,27 +2,20 @@ import React from 'react';
 
 const SectionComponent = ({ text, heading, subheading, children }) => {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '20px' }}>
-      <div style={{ 
-          marginBottom: '20px', 
-          border: '1px solid #0000002A',
-          borderRadius: '10px',
-          padding: '5px',
-          backgroundColor: '#f9f9f9',
-          fontSize:'11px',
-        }}>
-        <p style={{ padding: '0 5px', margin: '0' }}>{text}</p>
+    <div className="flex flex-col items-center   ">
+      <div className="mb-5 border border-[#445cd8]/50 rounded-lg p-2 bg-gray-100/40 text-xs">
+        <p className="px-2   font-light">{text}</p>
       </div>
 
       <div>
-        <p style={{ fontSize: '50px' }}>{heading}</p>
+        <p className="text-4xl md:text-5xl text-center px-4">{heading}</p>
       </div>
 
-      <div style={{ marginBottom: '40px', maxWidth: '600px', textAlign: 'center' }}>
-        <h3 style={{ margin: '0', wordWrap: 'break-word' }}>{subheading}</h3> {/* Props used here */}
+      <div className="mb-10 max-w-md text-center ">
+        <h3 className=" px-4 pt-4 break-words">{subheading}</h3>
       </div>
 
-      <div style={{ width: '100%', marginBottom: '150px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="w-full mb-40 flex items-center justify-center">
         {children}
       </div>
     </div>

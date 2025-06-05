@@ -1,131 +1,81 @@
 import React from 'react';
 
 const Footer = () => {
+  const handleCareerEmail = () => {
+    const email = 'hr@syslab.ai';
+    const subject = encodeURIComponent('Career Opportunities Inquiry');
+    const body = encodeURIComponent(
+      `Dear HR Team,\n\nI am writing to inquire about any current career opportunities at SysLab.AI. I am particularly interested in contributing to your innovative AI solutions and would appreciate any information about open positions.\n\nThank you for your time and consideration.\n\nBest regards,`
+    );
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
+  };
+
   return (
-    <footer className="footer">
-      <div className="footer-content">
-        <div className="footer-section">
-          <h4>About us</h4>
-          <ul>
-            <li>Homepage</li>
-            <li>About</li>
-            <li>Products</li>
-            <li>Awards & Partners</li>
-            <li>Contact Us</li>
+    <div className="text-gray-800 py-5 w-full text-xs border-t border-gray-200">
+      <div className="flex flex-wrap justify-center max-w-7xl mx-auto px-2.5">
+        <div className="flex-1 min-w-[200px] mb-4 mr-4 text-center">
+          <h4 className="font-bold mb-2.5 text-sm">Eyecon AI</h4>
+          <ul className="list-none p-0">
+            <li className="mb-2">Home</li>
+            <li className="mb-2">Research</li>
+            <li className="mb-2">
+              <button 
+                onClick={handleCareerEmail}
+                className="hover:text-blue-600 transition-colors duration-200"
+              >
+                Explore Careers
+              </button>
+            </li>
+            <li className="mb-2">
+              <a 
+                href="https://syslab.ai/#[object%20Object]"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-blue-600 transition-colors duration-200"
+              >
+                Awards & Partners
+              </a>
+            </li>
+            <li className="mb-2">Contact Us</li>
           </ul>
         </div>       
-        <div className="footer-section">
-          <h4>Contact Us</h4>
-          <ul>
-            <li>info@eyeconai.com</li>
-            <li>Room 1, Academic Block 3 FAST- National University of Computer Emerging Sciences ST-4, Sector 17-D, Shah Latif Town On National Highway Karachi</li>
+        <div className="flex-1 min-w-[200px] mb-4 mr-4 text-center">
+          <h4 className="font-bold mb-2.5 text-sm">Contact Us</h4>
+          <ul className="list-none p-0">
+            <li className="mb-2">info@eyeconai.com</li>
+            <li className="mb-2">FAST- National University of Computer Emerging Sciences ST-4, Sector 17-D, Shah Latif Town National Highway Karachi</li>
           </ul>
         </div>
-        <div className="footer-section">
-          <h4>Parent Company</h4>
-          <ul>
-            <li>
-              <img src="/images/logosyslab.svg"  alt="Syslab.AI" className="footer-image" />
+        <div className="flex-1 min-w-[200px] mb-4 text-center">
+          <h4 className="font-bold mb-2.5 text-sm">Parent Company</h4>
+          <ul className="list-none p-0">
+            <li className="mb-2">
+              <img src="/images/logosyslab.svg" alt="Syslab.AI" className="w-20 h-auto mt-2.5 mx-auto" />
             </li>           
-            <li>SYSLAB.AI (Private) Limited focuses on providing and developing innovative Artificially Intelligent (AI) solutions</li>
+            <li className="mb-2">SYSLAB.AI (Private) focuses on developing AI products</li>
           </ul>
         </div>
       </div>      
-      <div className="footer-bottom">
-        <ul>
-          <li>
-
-        Eyecon AI All rights reserved. ©{new Date().getFullYear()}
+      <div className="text-center mt-4 pt-4 text-xs">
+        <ul className="list-none p-0">
+          <li className="flex items-center justify-center gap-2">
+            <span>Eyecon AI All rights reserved. ©{new Date().getFullYear()}</span>
+            <a 
+              href="https://www.linkedin.com/company/eyeconai" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-block hover:opacity-80 transition-opacity"
+            >
+              <img 
+                src="/images/linkedin.png" 
+                alt="LinkedIn" 
+                className="w-5 h-5 object-contain"
+              />
+            </a>
           </li>
         </ul>
       </div>
-      
-      {/* Inline CSS */}
-      <style jsx>{`
-        /* Footer Styles */
-        .footer {
-          background-color: #F9F9F9FF;
-          padding: 40px 0;
-          color: #333;
-          width: 100%;
-          font-size: 14px;
-          border-top: 1px solid #eaeaea;
-        }
-        .footer-image {
-          width: 100px; /* Adjust the width as needed */
-          height: auto; /* Maintain aspect ratio */
-          margin-top: 10px; /* Add spacing */
-        }
-        .footer-content {
-          display: flex;
-          flex-wrap: wrap;
-          justify-content: space-between;
-          max-width: 1200px;
-          margin: 0 auto;
-          padding: 0 20px;
-        }
-
-        /* Footer Sections */
-        .footer-section {
-          flex: 1 1 200px;
-          margin-bottom: 20px;
-          margin-right: 20px;
-        }
-
-        .footer-section:last-child {
-          margin-right: 0;
-        }
-
-        .footer-section h4 {
-          font-weight: bold;
-          margin-bottom: 15px;
-          font-size: 16px;
-        }
-
-        .footer-section ul {
-          list-style: none;
-          padding: 0;
-        }
-
-        .footer-section li {
-          margin-bottom: 10px;
-        }
-
-        /* Footer Bottom */
-        .footer-bottom {
-          text-align: center;
-          margin-top: 20px;
-          padding-top: 20px;
-          font-size: 12px;
-        }
-
-        /* Social Icons */
-        .social-icons {
-          margin-top: 10px;
-        }
-
-        .social-icons a {
-          margin: 0 10px;
-          text-decoration: none;
-          color: #555;
-          font-weight: bold;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-          .footer-content {
-            flex-direction: column;
-            align-items: center;
-          }
-
-          .footer-section {
-            width: 100%;
-            text-align: center;
-            margin-right: 0;
-          }
-        }
-      `}</style>
-    </footer>
+    </div>
   );
 };
 

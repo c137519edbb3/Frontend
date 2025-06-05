@@ -8,10 +8,6 @@ const faqData = [
     answer: "Notifications are available via SMS, email, push notifications, and webhooks.",
   },
   {
-    question: "Is there support for integrations?",
-    answer: "Yes, we offer integration with tools like CCTV, live cameras, IoT sensors.",
-  },
-  {
     question: "How are anomalies grouped?",
     answer: "Detected anomalies are automatically categorized by type for better analysis.",
   },
@@ -21,7 +17,7 @@ const faqData = [
   },
   {
     question: "Can I train the AI with my own data?",
-    answer: "Yes, the platform allows custom AI training with proprietary datasets.",
+    answer: "Yes, you may contact the support team for more information",
   },
   {
     question: "What languages are supported?",
@@ -79,8 +75,8 @@ const Accordion = () => {
   };
 
   return (
-    <div className="max-w-full lg:w-full mx-auto px-1">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="max-w-full lg:w-full mx-auto px-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2">
         {faqData.map((faq, index) => (
           <div
             key={index}

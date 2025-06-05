@@ -84,10 +84,10 @@ export default function LandingPage() {
       {/* Content */}
       <div className="relative z-[2] w-full flex flex-col items-center">
         <Hero />
-        <Methodology />
+        {/* <Methodology /> */}
         <WhyChooseUs />
         <WhoFor />
-        <Team />
+        {/* <Team /> */}
         <FAQ />
         <BookDemo />
         <Footer />
