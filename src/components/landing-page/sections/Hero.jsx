@@ -5,6 +5,7 @@ import SectionComponent from '../SectionComponent';
 import { ContainerScroll } from "../ui/container-scroll-animation";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import { motion } from "framer-motion";
+import { Youtube } from "lucide-react";
 
 import {
   Eye,
@@ -93,15 +94,18 @@ const Hero = () => {
               <span className="absolute -bottom-0 left-[1.125rem] h-px w-[calc(100%-2.25rem)] bg-gradient-to-r from-emerald-400/0 via-emerald-400/90 to-emerald-400/0 transition-opacity duration-500 group-hover:opacity-40" />
             </motion.button>
 
+            <a href="https://www.youtube.com/playlist?list=PLn-yikTc-pfF6eSq7PQP5_HI9QmJQKOtg" target="_blank" rel="noopener noreferrer">
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               type="button"
               className="inline-flex justify-center items-center py-2.5 px-5 text-sm font-medium text-center text-gray-700 border border-gray-500 rounded-lg hover:bg-gray-100 focus:ring-4 focus:ring-gray-300 backdrop-blur-sm bg-white/30"
             >
-              Live Demo
+               <img src="/images/youtube.png" alt="YouTube" className="w-auto h-6 " />
             </motion.button>
+            </a>
           </motion.div>
+          
 
           <motion.div
             initial={{ y: 20, opacity: 0 }}
