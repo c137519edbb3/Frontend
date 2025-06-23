@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/authContext';
-import SmoothScrollProvider from '@/components/SmoothScrollProvider';
+import dynamic from 'next/dynamic';
 
 // Import your landing page components
 import Hero from '@/components/landing-page/sections/Hero';
@@ -15,6 +15,12 @@ import FAQ from '@/components/landing-page/sections/FAQ';
 import BookDemo from '@/components/landing-page/sections/BookDemo';
 import Footer from '@/components/landing-page/sections/Footer';
 import { Button } from '@/components/ui/button';
+
+// Dynamically import SmoothScrollProvider to prevent SSR issues
+const SmoothScrollProvider = dynamic(() => import('@/components/SmoothScrollProvider'), {
+  ssr: false,
+  loading: () => <div>{/* Your loading component or children */}</div>
+});
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
@@ -37,23 +43,8 @@ export default function Home() {
         {/* Navigation Button (Login/Dashboard) */}
         <div className="fixed top-4 right-4 z-50">
           <Link href={buttonLink}>
-            <Button variant="outline" className="bg-white/80 backdrop-blur-sm border-indigo-300 hover:bg-indigo-50">
-              {buttonText} 
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="ml-2 h-4 w-4"
-              >
-                <path d="M5 12h14" />
-                <path d="m12 5 7 7-7 7" />
-              </svg>
+            <Button variant="outline" className="bg-white/80 backdrop-blur-sm border-purple-300 hover:bg-purple-50">
+              {buttonText}
             </Button>
           </Link>
         </div>
@@ -84,7 +75,7 @@ export default function Home() {
         
         {/* Shadows Background */}
         <div 
-          className="absolute top-0 left-0 right-0 h-full bg-no-repeat z-10 pointer-events-none"
+          className="absolute top-0 left-0 right-0 h-full bg-no-repeat z-1 pointer-events-none"
           style={{ 
             backgroundImage: "url('/images/shadows_bg.png')",
             backgroundSize: "100% auto"
@@ -94,7 +85,7 @@ export default function Home() {
         />
         
         {/* Background Image for ChooseUs section */}
-        {/* <div 
+        <div 
           className="absolute left-0 right-0 bg-no-repeat bg-cover z-[-10]"
           style={{ 
             backgroundImage: "url('/images/bg_img.png')",
@@ -104,7 +95,7 @@ export default function Home() {
           }} 
           data-scroll
           data-scroll-speed="-3"
-        /> */}
+        />
         
         {/* Content */}
         <div className="relative z-[2] w-full flex flex-col items-center">
@@ -122,10 +113,10 @@ export default function Home() {
           <div data-scroll data-scroll-speed="1">
             <FAQ />
           </div>
-          <div data-scroll data-scroll-speed="1" className='w-full'>
+          <div data-scroll data-scroll-speed="1">
             <BookDemo />
           </div>
-          <div data-scroll data-scroll-speed="1" className='w-full bg-gray-200'>
+          <div data-scroll data-scroll-speed="1">
             <Footer />
           </div>
         </div>

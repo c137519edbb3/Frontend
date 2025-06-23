@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import LocomotiveScroll from 'locomotive-scroll';
 import 'locomotive-scroll/dist/locomotive-scroll.css';
 
 const SmoothScrollProvider = ({ children }) => {
   const scrollRef = useRef(null);
   const [isDesktop, setIsDesktop] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
+    
     // Check if window is defined (client-side)
     if (typeof window !== 'undefined') {
       // Initial check
@@ -23,25 +25,26 @@ const SmoothScrollProvider = ({ children }) => {
 
       // Initialize scroll only if desktop
       if (window.innerWidth > 1024) {
-        const scroll = new LocomotiveScroll({
-          el: scrollRef.current,
-          smooth: true,
-          multiplier: 1,
-          class: 'is-revealed',
-          smartphone: {
-            smooth: false,
-          },
-          tablet: {
-            smooth: false,
-          }
-        });
+        import('locomotive-scroll').then((LocomotiveScroll) => {
+          const scroll = new LocomotiveScroll.default({
+            el: scrollRef.current,
+            smooth: true,
+            multiplier: 1,
+            class: 'is-revealed',
+            smartphone: {
+              smooth: false,
+            },
+            tablet: {
+              smooth: false,
+            }
+          });
 
-        return () => {
-          if (scroll) {
-            scroll.destroy();
-          }
-          window.removeEventListener('resize', handleResize);
-        };
+          return () => {
+            if (scroll) {
+              scroll.destroy();
+            }
+          };
+        });
       }
 
       return () => {
@@ -49,6 +52,11 @@ const SmoothScrollProvider = ({ children }) => {
       };
     }
   }, []);
+
+  // Don't render anything until client-side
+  if (!isClient) {
+    return <div>{children}</div>;
+  }
 
   return (
     <div 
